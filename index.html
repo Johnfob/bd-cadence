@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BD Cadence">
+<title>Telluno BD Cadence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+/* ═══════════════════ TOKENS ═══════════════════ */
+:root {
+  --bg:       #0b0d11;
+  --surface:  #13161e;
+  --card:     #1a1e29;
+  --border:   #252b3b;
+  --accent:   #e8613a;
+  --blue:     #3a8fe8;
+  --green:    #3ae8a0;
+  --amber:    #e8c23a;
+  --red:      #e83a5a;
+  --ves:      #e8613a;
+  --gyre:     #3a8fe8;
+  --text:     #eef0f7;
+  --muted:    #7a849e;
+  --radius:   14px;
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bot: env(safe-area-inset-bottom, 20px);
+}
+
+/* ═══════════════════ RESET ═══════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,textarea,select{font-family:inherit;}
+a{color:inherit;text-decoration:none;}
+::-webkit-scrollbar{width:0;}
+
+/* ═══════════════════ LAYOUT ═══════════════════ */
+.app{max-width:430px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;}
+.screen{display:none;flex-direction:column;min-height:100vh;animation:fadeIn .18s ease;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════ TOP BAR ═══════════════════ */
+.topbar{
+  padding:calc(var(--safe-top) + 10px) 20px 14px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  position:sticky;top:0;z-index:10;
+}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;}
+.topbar-sub{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.6px;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;flex-shrink:0;}
+.back-btn{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--accent);font-weight:500;}
+.back-btn svg{width:16px;height:16px;}
+
+/* ═══════════════════ SCROLL BODY ═══════════════════ */
+.scroll-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.scroll-body::-webkit-scrollbar{width:0;}
+
+/* ═══════════════════ BOTTOM NAV ═══════════════════ */
+.bottom-nav{
+  display:flex;background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:8px 0 calc(var(--safe-bot) + 4px);
+  flex-shrink:0;
+}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;}
+.nav-item svg{width:22px;height:22px;color:var(--muted);transition:color .15s;}
+.nav-item span{font-size:10px;color:var(--muted);font-weight:500;transition:color .15s;}
+.nav-item.active svg,.nav-item.active span{color:var(--accent);}
+
+/* ═══════════════════ CARDS ═══════════════════ */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:10px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .1s;}
+.card:active{transform:scale(.985);}
+.card-accent{position:absolute;left:0;top:0;bottom:0;width:3px;}
+.card.ves .card-accent{background:var(--ves);}
+.card.gyre .card-accent{background:var(--gyre);}
+.card.telluno .card-accent{background:#9b3ae8;}
+.card-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;line-height:1.2;}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.card-note{margin-top:9px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.5;}
+.card-note strong{color:var(--text);font-weight:500;}
+.card-chips{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--muted);}
+.chip svg{width:11px;height:11px;}
+.chip.phone{border-color:rgba(58,232,160,.3);color:var(--green);background:rgba(58,232,160,.06);}
+.chip.email{border-color:rgba(58,143,232,.3);color:var(--blue);background:rgba(58,143,232,.06);}
+.chip.li{border-color:rgba(232,194,58,.3);color:var(--amber);background:rgba(232,194,58,.06);}
+.chip.wa{border-color:rgba(58,232,160,.3);color:var(--green);background:rgba(58,232,160,.06);}
+.chip.sms{border-color:rgba(232,97,58,.3);color:var(--accent);background:rgba(232,97,58,.06);}
+
+/* ═══════════════════ BADGES ═══════════════════ */
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
+.badge.ves{background:rgba(232,97,58,.15);color:var(--ves);}
+.badge.gyre{background:rgba(58,143,232,.15);color:var(--gyre);}
+.badge.done{background:rgba(58,232,160,.15);color:var(--green);}
+.badge.overdue{background:rgba(232,58,90,.15);color:var(--red);}
+
+/* Priority dot */
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot.hot{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.dot.warm{background:var(--amber);}
+.dot.cool{background:var(--border);}
+
+/* Stage pill */
+.stage-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;}
+.stage-pill.prospect{background:rgba(122,132,158,.15);color:var(--muted);}
+.stage-pill.qualified{background:rgba(58,143,232,.15);color:var(--blue);}
+.stage-pill.study{background:rgba(232,194,58,.15);color:var(--amber);}
+.stage-pill.proposal{background:rgba(232,97,58,.15);color:var(--accent);}
+.stage-pill.negotiation{background:rgba(155,58,232,.15);color:#b87aff;}
+.stage-pill.won{background:rgba(58,232,160,.15);color:var(--green);}
+
+/* ═══════════════════ SECTION HEADERS ═══════════════════ */
+.sect{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:14px 0 8px;}
+.sect.warn{color:var(--red);}
+
+/* ═══════════════════ DATE STRIP ═══════════════════ */
+.date-strip{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.date-big{font-family:'Syne',sans-serif;font-size:27px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.date-small{font-size:12px;color:var(--muted);margin-top:4px;}
+.count-pill{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;font-family:'Syne',sans-serif;flex-shrink:0;}
+
+/* ═══════════════════ FILTER TABS ═══════════════════ */
+.ftabs{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:3px;}
+.ftabs::-webkit-scrollbar{display:none;}
+.ftab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
+.ftab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ═══════════════════ DETAIL HEADER ═══════════════════ */
+.detail-header{padding:calc(var(--safe-top) + 8px) 20px 18px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.detail-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.6px;margin-top:12px;line-height:1.1;}
+.detail-role{font-size:13px;color:var(--muted);margin-top:3px;}
+.detail-company{font-size:15px;font-weight:500;margin-top:1px;}
+.action-row{display:flex;gap:8px;margin-top:14px;}
+.act-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 6px;border-radius:12px;font-size:13px;font-weight:600;border:1px solid;transition:all .12s;cursor:pointer;}
+.act-btn:active{transform:scale(.96);}
+.act-btn svg{width:17px;height:17px;flex-shrink:0;}
+.act-btn.phone{background:rgba(58,232,160,.1);color:var(--green);border-color:rgba(58,232,160,.25);}
+.act-btn.email{background:rgba(58,143,232,.1);color:var(--blue);border-color:rgba(58,143,232,.25);}
+.act-btn.li{background:rgba(232,194,58,.1);color:var(--amber);border-color:rgba(232,194,58,.25);}
+.act-btn.wa{background:rgba(58,232,160,.1);color:var(--green);border-color:rgba(58,232,160,.25);}
+
+/* ═══════════════════ STATUS CARD ═══════════════════ */
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px;}
+.stat-card-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:11px;}
+.stat-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.stat-row:last-child{margin-bottom:0;}
+.stat-key{font-size:12px;color:var(--muted);}
+.stat-val{font-size:13px;font-weight:500;text-align:right;max-width:220px;}
+.stat-note{margin-top:10px;padding:10px;background:rgba(255,255,255,.03);border-radius:9px;font-size:12px;line-height:1.6;color:var(--text);}
+.stat-note-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);font-weight:600;display:block;margin-bottom:4px;}
+
+/* ═══════════════════ LOG CARD ═══════════════════ */
+.log-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px;}
+.outcome-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.otab{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
+.otab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.log-ta{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:12px;resize:none;min-height:85px;line-height:1.55;outline:none;transition:border-color .15s;}
+.log-ta:focus{border-color:var(--accent);}
+.log-ta::placeholder{color:var(--muted);}
+
+/* Stage selector */
+.stage-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none;margin-top:10px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a849e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.stage-select:focus{border-color:var(--accent);}
+
+/* Next action input */
+.na-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none;margin-top:10px;transition:border-color .15s;}
+.na-input:focus{border-color:var(--accent);}
+.na-input::placeholder{color:var(--muted);}
+
+.voice-row{display:flex;gap:8px;margin-top:10px;align-items:center;}
+.voice-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;background:rgba(232,97,58,.1);color:var(--accent);border:1px solid rgba(232,97,58,.3);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.voice-btn.listening{background:rgba(232,97,58,.25);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,97,58,.4)}50%{box-shadow:0 0 0 8px rgba(232,97,58,0)}}
+.voice-btn svg{width:16px;height:16px;}
+.voice-hint{font-size:11px;color:var(--muted);line-height:1.4;}
+
+/* Draft area */
+.draft-area{background:rgba(58,143,232,.06);border:1px solid rgba(58,143,232,.2);border-radius:10px;padding:12px;margin-top:10px;display:none;}
+.draft-area.show{display:block;}
+.draft-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--blue);font-weight:700;margin-bottom:7px;}
+.draft-text{font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--text);}
+.draft-actions{display:flex;gap:8px;margin-top:10px;}
+.draft-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
+.draft-btn:active{background:var(--border);}
+.draft-btn svg{width:12px;height:12px;}
+
+.save-btn{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;margin-top:12px;letter-spacing:.3px;}
+.save-btn:active{background:#d4522f;transform:scale(.98);}
+.save-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;transform:none;}
+
+/* ═══════════════════ KPI ═══════════════════ */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;margin-bottom:8px;}
+.kpi-val{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.kpi-delta{font-size:11px;color:var(--green);margin-top:5px;}
+.kpi-delta.down{color:var(--accent);}
+.kpi-delta.neutral{color:var(--muted);}
+
+.pipe-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.pipe-bar-label{font-size:12px;color:var(--muted);width:100px;flex-shrink:0;}
+.pipe-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.pipe-bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.pipe-bar-count{font-size:12px;font-weight:600;width:22px;text-align:right;flex-shrink:0;}
+
+/* ═══════════════════ LOADING ═══════════════════ */
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;}
+.loading-screen.hidden{display:none;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.loading-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text);}
+
+/* ═══════════════════ TOAST ═══════════════════ */
+.toast{position:fixed;bottom:calc(var(--safe-bot) + 80px);left:50%;transform:translateX(-50%) translateY(12px);background:var(--green);color:#0b0d11;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap;font-family:'Syne',sans-serif;}
+.toast.error{background:var(--red);color:#fff;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ═══════════════════ SETUP SCREEN ═══════════════════ */
+.setup-screen{padding:calc(var(--safe-top) + 20px) 20px calc(var(--safe-bot) + 20px);overflow-y:auto;}
+.setup-logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:4px;}
+.setup-logo span{color:var(--accent);}
+.setup-tagline{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.setup-step{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.setup-step-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.setup-step-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;}
+.setup-step-body{font-size:13px;color:var(--muted);line-height:1.65;}
+.setup-step-body code{background:var(--border);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:var(--text);}
+.setup-step-body a{color:var(--blue);}
+.setup-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:12px;outline:none;margin-top:10px;transition:border-color .15s;}
+.setup-input:focus{border-color:var(--accent);}
+.setup-input::placeholder{color:var(--muted);}
+.setup-label{font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:4px;display:block;}
+.setup-save-btn{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-top:20px;}
+.setup-steps-ol{padding-left:16px;margin-top:8px;}
+.setup-steps-ol li{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:4px;}
+.setup-steps-ol li b{color:var(--text);}
+
+/* ═══════════════════ SIGN IN SCREEN ═══════════════════ */
+.signin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;text-align:center;}
+.signin-mark{width:72px;height:72px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.signin-mark svg{width:36px;height:36px;color:#fff;}
+.signin-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:8px;}
+.signin-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:32px;}
+.signin-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:13px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;margin-bottom:12px;}
+.signin-btn:active{background:#d4522f;transform:scale(.98);}
+.signin-btn svg{width:20px;height:20px;}
+.setup-link{font-size:13px;color:var(--blue);cursor:pointer;padding:8px;}
+
+/* Completed card style */
+.card.completed{opacity:.4;pointer-events:none;}
+
+/* Overdue highlight */
+.card.overdue{border-color:rgba(232,58,90,.3);}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-state svg{width:48px;height:48px;color:var(--border);margin-bottom:14px;}
+.empty-state-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;}
+.empty-state-sub{font-size:14px;color:var(--muted);line-height:1.6;}
+
+/* Sync indicator */
+.sync-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:14px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red);}
+
+/* Spacer */
+.spacer{height:20px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ══════════════════════════════════════════ -->
+<!--  LOADING OVERLAY                          -->
+<!-- ══════════════════════════════════════════ -->
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-title">BD Cadence</div>
+  <div class="loading-text" id="loading-text">Starting up…</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: SETUP                            -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-setup" class="screen" style="overflow-y:auto;">
+  <div class="setup-screen">
+    <div class="setup-logo">Telluno <span>BD</span></div>
+    <div class="setup-tagline">One-time setup · Takes about 10 minutes</div>
+
+    <div class="setup-step">
+      <div class="setup-step-num">Step 1 of 4</div>
+      <div class="setup-step-title">Register an Azure App (free)</div>
+      <div class="setup-step-body">
+        This gives the tool secure read/write access to your OneDrive Excel files using your Microsoft 365 login.
+        <ol class="setup-steps-ol">
+          <li>Go to <a href="https://portal.azure.com" target="_blank">portal.azure.com</a> and sign in with your M365 account</li>
+          <li>Search <b>"App registrations"</b> → click <b>New registration</b></li>
+          <li>Name: <code>Telluno BD Cadence</code></li>
+          <li>Supported account types: <b>Accounts in any organizational directory and personal Microsoft accounts</b></li>
+          <li>Redirect URI: <b>Single-page application</b> → enter the URL of this page (your GitHub Pages URL)</li>
+          <li>Click <b>Register</b></li>
+          <li>On the Overview page, copy the <b>Application (client) ID</b></li>
+          <li>Go to <b>API permissions → Add permission → Microsoft Graph → Delegated</b> → select <code>Files.ReadWrite</code> and <code>User.Read</code> → Add</li>
+        </ol>
+        <span id="redirect-hint" style="display:block;margin-top:8px;padding:8px;background:rgba(58,143,232,.1);border-radius:8px;color:var(--blue);font-size:12px;"></span>
+      </div>
+      <label class="setup-label">Paste your Application (Client) ID here:</label>
+      <input class="setup-input" id="setup-clientid" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-step-num">Step 2 of 4</div>
+      <div class="setup-step-title">Add a TODAY column to your pipeline files</div>
+      <div class="setup-step-body">
+        Open <b>VES_Pipeline.xlsx</b> and <b>Gyre_Pipeline.xlsx</b> in Excel. Add a new column header called <code>TODAY</code> (column M is recommended, after Week Updated).
+        <br><br>Each evening or morning, type <code>Y</code> in the TODAY column for every contact you want on that day's cadence list. The tool filters on this — it won't show anyone without a Y.
+        <br><br>After logging an outcome, the tool automatically changes that cell to <code>Done</code> so your list self-manages.
+      </div>
+      <label class="setup-label">Pipeline sheet name (default: Pipeline):</label>
+      <input class="setup-input" id="setup-pipe-sheet" placeholder="Pipeline" value="Pipeline">
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-step-num">Step 3 of 4</div>
+      <div class="setup-step-title">Confirm your OneDrive file paths</div>
+      <div class="setup-step-body">
+        Enter the paths to your files relative to your OneDrive root folder. Use forward slashes.
+      </div>
+      <label class="setup-label">VES Pipeline path:</label>
+      <input class="setup-input" id="setup-ves" placeholder="Telluno/VES_Pipeline.xlsx" value="Telluno/VES_Pipeline.xlsx">
+      <label class="setup-label">Gyre Pipeline path:</label>
+      <input class="setup-input" id="setup-gyre" placeholder="Telluno/Gyre_Pipeline.xlsx" value="Telluno/Gyre_Pipeline.xlsx">
+      <label class="setup-label">Master Contacts path:</label>
+      <input class="setup-input" id="setup-contacts" placeholder="Telluno/Telluno_Contacts.xlsx" value="Telluno/Telluno_Contacts.xlsx">
+      <label class="setup-label">Contacts sheet name:</label>
+      <input class="setup-input" id="setup-cont-sheet" placeholder="Contacts" value="Contacts">
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-step-num">Step 4 of 4</div>
+      <div class="setup-step-title">Host this file on GitHub Pages</div>
+      <div class="setup-step-body">
+        This tool needs to be served from a URL (not opened as a local file) for Microsoft login to work. GitHub Pages is free and takes 5 minutes.
+        <ol class="setup-steps-ol">
+          <li>Create a free account at <a href="https://github.com" target="_blank">github.com</a></li>
+          <li>New repository → name: <code>bd-cadence</code> → set to <b>Public</b></li>
+          <li>Upload this HTML file as <code>index.html</code></li>
+          <li>Settings → Pages → Source: <b>main branch</b> → Save</li>
+          <li>Your URL will be: <code>https://[username].github.io/bd-cadence/</code></li>
+          <li>Go back to your Azure App Registration → Authentication → update the Redirect URI to this URL</li>
+        </ol>
+        Once hosted, open that URL on your iPhone, add to Home Screen via Share → Add to Home Screen.
+      </div>
+    </div>
+
+    <button class="setup-save-btn" onclick="saveSetup()">Save & Sign In with Microsoft →</button>
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: SIGN IN                          -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-signin" class="screen">
+  <div class="signin-screen">
+    <div class="signin-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    </div>
+    <div class="signin-title">Telluno BD Cadence</div>
+    <div class="signin-sub">Sign in with your Microsoft 365 account to access your pipeline and contacts.</div>
+    <button class="signin-btn" onclick="signIn()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 2.5H2.5v9h9v-9zM21.5 2.5h-9v9h9v-9zM11.5 12.5h-9v9h9v-9zM21.5 12.5h-9v9h9v-9z"/></svg>
+      Sign in with Microsoft
+    </button>
+    <div class="setup-link" onclick="showScreen('setup')">⚙ Reconfigure setup</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: TODAY'S LIST                     -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-list" class="screen">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="topbar-title">BD Cadence</div>
+        <div class="topbar-sub" id="list-date-sub">Loading…</div>
+      </div>
+      <div class="avatar" id="user-avatar">JO</div>
+    </div>
+  </div>
+
+  <div class="scroll-body">
+    <div class="date-strip">
+      <div>
+        <div class="date-big" id="list-date-big">Today</div>
+        <div class="date-small" id="list-date-small">Loading contacts…</div>
+      </div>
+      <div class="count-pill" id="list-count">—</div>
+    </div>
+
+    <div class="sync-row">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">Connecting to OneDrive…</span>
+      <button onclick="refreshData()" style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:500;">Refresh</button>
+    </div>
+
+    <div class="ftabs" id="list-filters">
+      <div class="ftab active" data-filter="all">All</div>
+      <div class="ftab" data-filter="ves">VES</div>
+      <div class="ftab" data-filter="gyre">Gyre</div>
+      <div class="ftab" data-filter="call">Call</div>
+      <div class="ftab" data-filter="email">Email</div>
+    </div>
+
+    <div id="list-body">
+      <div class="empty-state">
+        <div class="loading-text">Loading your cadence list…</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="gotoTab('list')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span>Today</span>
+    </div>
+    <div class="nav-item" onclick="gotoTab('pipeline')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Pipeline</span>
+    </div>
+    <div class="nav-item" onclick="gotoTab('kpi')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>KPIs</span>
+    </div>
+    <div class="nav-item" onclick="gotoTab('log')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Log</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: CONTACT DETAIL                   -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-detail" class="screen">
+  <div class="detail-header">
+    <div class="topbar-row">
+      <button class="back-btn" onclick="showScreen('list')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Today's List
+      </button>
+      <div class="badge ves" id="d-badge">VES</div>
+    </div>
+    <div class="detail-name" id="d-name">—</div>
+    <div class="detail-role" id="d-role">—</div>
+    <div class="detail-company" id="d-company">—</div>
+    <div class="action-row" id="d-actions"></div>
+  </div>
+
+  <div class="scroll-body">
+    <div class="stat-card">
+      <div class="stat-card-title">Pipeline Status</div>
+      <div class="stat-row">
+        <div class="stat-key">Stage</div>
+        <div class="stat-val"><span class="stage-pill qualified" id="d-stage">—</span></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-key">Value</div>
+        <div class="stat-val" id="d-value">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-key">Next Action</div>
+        <div class="stat-val" id="d-next-action">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-key">Last Contact</div>
+        <div class="stat-val" id="d-last">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-key">Opportunity</div>
+        <div class="stat-val" id="d-oppo">—</div>
+      </div>
+      <div class="stat-note" id="d-note-wrap" style="display:none;">
+        <span class="stat-note-label">Latest note</span>
+        <span id="d-note"></span>
+      </div>
+    </div>
+
+    <div class="log-card">
+      <div class="stat-card-title">Log Outcome</div>
+      <div class="outcome-tabs" id="outcome-tabs">
+        <div class="otab active" data-outcome="Called">Called</div>
+        <div class="otab" data-outcome="Emailed">Emailed</div>
+        <div class="otab" data-outcome="LinkedIn">LinkedIn</div>
+        <div class="otab" data-outcome="WhatsApp">WhatsApp</div>
+        <div class="otab" data-outcome="No Answer">No Answer</div>
+        <div class="otab" data-outcome="Meeting">Meeting</div>
+      </div>
+
+      <textarea class="log-ta" id="log-ta" placeholder="What happened? Type or use your iPhone mic below…" rows="4"></textarea>
+
+      <select class="stage-select" id="stage-select">
+        <option value="">Keep current stage</option>
+        <option value="Prospect">Prospect</option>
+        <option value="Qualified">Qualified</option>
+        <option value="Study Sent">Study Sent</option>
+        <option value="Proposal">Proposal</option>
+        <option value="Negotiation">Negotiation</option>
+        <option value="Won">Won</option>
+        <option value="Lost">Lost</option>
+      </select>
+
+      <input class="na-input" id="na-input" placeholder="Update next action (optional)…">
+
+      <div class="voice-row">
+        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Tap to Speak
+        </button>
+      </div>
+      <div class="voice-hint">Tap Speak, dictate your update, tap again to stop · Or just type</div>
+
+      <!-- Draft message (shows for Email / LinkedIn / WhatsApp) -->
+      <div class="draft-area" id="draft-area">
+        <div class="draft-label" id="draft-label">Draft Message</div>
+        <div class="draft-text" id="draft-text"></div>
+        <div class="draft-actions">
+          <button class="draft-btn" onclick="copyDraft()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <button class="draft-btn" id="draft-open-btn" onclick="openDraftTarget()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open
+          </button>
+        </div>
+      </div>
+
+      <button class="save-btn" id="save-btn" onclick="saveOutcome()">Save to Pipeline ↗</button>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: PIPELINE                         -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-pipeline" class="screen">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="topbar-title">Pipeline</div>
+        <div class="topbar-sub">Live · Both Accounts</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-body">
+    <div id="pipeline-body">
+      <div class="empty-state"><div class="loading-text">Loading pipeline…</div></div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="gotoTab('list')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>Today</span></div>
+    <div class="nav-item active" onclick="gotoTab('pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Pipeline</span></div>
+    <div class="nav-item" onclick="gotoTab('kpi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>KPIs</span></div>
+    <div class="nav-item" onclick="gotoTab('log')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Log</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: KPI DASHBOARD                    -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-kpi" class="screen">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div><div class="topbar-title">KPI Dashboard</div><div class="topbar-sub" id="kpi-period">This Week</div></div>
+    </div>
+  </div>
+  <div class="scroll-body">
+    <div id="kpi-body"><div class="empty-state"><div class="loading-text">Loading KPIs…</div></div></div>
+    <div class="spacer"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="gotoTab('list')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>Today</span></div>
+    <div class="nav-item" onclick="gotoTab('pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Pipeline</span></div>
+    <div class="nav-item active" onclick="gotoTab('kpi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>KPIs</span></div>
+    <div class="nav-item" onclick="gotoTab('log')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Log</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCREEN: ACTIVITY LOG                     -->
+<!-- ══════════════════════════════════════════ -->
+<div id="screen-log" class="screen">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div><div class="topbar-title">Activity Log</div><div class="topbar-sub">Session · Today</div></div>
+    </div>
+  </div>
+  <div class="scroll-body">
+    <div id="log-body">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div class="empty-state-title">No activity yet</div>
+        <div class="empty-state-sub">Outcomes you log during this session will appear here. They're saved to your Excel pipeline immediately.</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="gotoTab('list')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>Today</span></div>
+    <div class="nav-item" onclick="gotoTab('pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Pipeline</span></div>
+    <div class="nav-item" onclick="gotoTab('kpi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>KPIs</span></div>
+    <div class="nav-item active" onclick="gotoTab('log')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Log</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- /app -->
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════
+   CONFIG — persisted to localStorage after setup
+══════════════════════════════════════════════════ */
+const CFG = {
+  get clientId()    { return localStorage.getItem('tc_cid') || ''; },
+  get vesPipeline() { return localStorage.getItem('tc_ves') || 'Telluno/VES_Pipeline.xlsx'; },
+  get gyrePipeline(){ return localStorage.getItem('tc_gyre') || 'Telluno/Gyre_Pipeline.xlsx'; },
+  get contacts()    { return localStorage.getItem('tc_cont') || 'Telluno/Telluno_Contacts.xlsx'; },
+  get pipeSheet()   { return localStorage.getItem('tc_ps') || 'Pipeline'; },
+  get contSheet()   { return localStorage.getItem('tc_cs') || 'Contacts'; },
+};
+
+const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
+const SCOPES     = ['Files.ReadWrite', 'User.Read'];
+const TODAY_COL  = 'TODAY';
+
+let msalInstance = null;
+let currentAccount = null;
+let appData = { today: [], vesAll: [], gyreAll: [], contacts: {}, vesHeaders: [], gyreHeaders: [], contHeaders: [] };
+let currentContact = null;
+let currentOutcome = 'Called';
+let recognition = null;
+let isListening = false;
+let sessionLog = [];
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Show redirect hint in setup
+  document.getElementById('redirect-hint').textContent =
+    'Your redirect URI (for Azure): ' + window.location.href.split('?')[0].split('#')[0];
+
+  // Pre-fill setup fields from saved config
+  document.getElementById('setup-clientid').value  = CFG.clientId;
+  document.getElementById('setup-ves').value        = CFG.vesPipeline;
+  document.getElementById('setup-gyre').value       = CFG.gyrePipeline;
+  document.getElementById('setup-contacts').value   = CFG.contacts;
+  document.getElementById('setup-pipe-sheet').value = CFG.pipeSheet;
+  document.getElementById('setup-cont-sheet').value = CFG.contSheet;
+
+  // Wire up filter tabs
+  document.querySelectorAll('#list-filters .ftab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#list-filters .ftab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      renderList(t.dataset.filter);
+    });
+  });
+
+  // Wire up outcome tabs
+  document.querySelectorAll('#outcome-tabs .otab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#outcome-tabs .otab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentOutcome = t.dataset.outcome;
+      updateDraftArea();
+    });
+  });
+
+  hideLoading();
+
+  if (!CFG.clientId) {
+    showScreen('setup');
+    return;
+  }
+
+  initMsal();
+});
+
+/* ══════════════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════════════ */
+function saveSetup() {
+  const cid = document.getElementById('setup-clientid').value.trim();
+  if (!cid) { showToast('Paste your Azure Client ID first', true); return; }
+  localStorage.setItem('tc_cid',  cid);
+  localStorage.setItem('tc_ves',  document.getElementById('setup-ves').value.trim());
+  localStorage.setItem('tc_gyre', document.getElementById('setup-gyre').value.trim());
+  localStorage.setItem('tc_cont', document.getElementById('setup-contacts').value.trim());
+  localStorage.setItem('tc_ps',   document.getElementById('setup-pipe-sheet').value.trim() || 'Pipeline');
+  localStorage.setItem('tc_cs',   document.getElementById('setup-cont-sheet').value.trim() || 'Contacts');
+  initMsal();
+}
+
+/* ══════════════════════════════════════════════════
+   MSAL AUTH
+══════════════════════════════════════════════════ */
+function initMsal() {
+  showLoading('Initialising…');
+  try {
+    msalInstance = new msal.PublicClientApplication({
+      auth: {
+        clientId:   CFG.clientId,
+        authority:  'https://login.microsoftonline.com/common',
+        redirectUri: window.location.href.split('?')[0].split('#')[0],
+      },
+      cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
+    });
+
+    msalInstance.handleRedirectPromise().then(response => {
+      if (response) currentAccount = response.account;
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length > 0) {
+        currentAccount = currentAccount || accounts[0];
+        hideLoading();
+        showScreen('list');
+        loadData();
+      } else {
+        hideLoading();
+        showScreen('signin');
+      }
+    }).catch(err => {
+      console.error(err);
+      hideLoading();
+      showScreen('signin');
+    });
+  } catch(e) {
+    hideLoading();
+    showToast('MSAL init failed — check Client ID', true);
+    showScreen('setup');
+  }
+}
+
+async function signIn() {
+  try {
+    showLoading('Opening Microsoft login…');
+    const response = await msalInstance.loginPopup({ scopes: SCOPES });
+    currentAccount = response.account;
+    hideLoading();
+
+    // Show username initial in avatar
+    const name = currentAccount.name || 'You';
+    const initials = name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('user-avatar').textContent = initials;
+
+    showScreen('list');
+    loadData();
+  } catch(e) {
+    hideLoading();
+    if (!e.message?.includes('user_cancelled')) {
+      showToast('Sign in failed: ' + (e.message || e), true);
+    }
+  }
+}
+
+async function getToken() {
+  if (!currentAccount) throw new Error('Not signed in');
+  try {
+    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
+    return r.accessToken;
+  } catch {
+    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
+    return r.accessToken;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   GRAPH API HELPERS
+══════════════════════════════════════════════════ */
+async function graphGet(endpoint) {
+  const token = await getToken();
+  const r = await fetch(GRAPH_BASE + endpoint, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(body.error?.message || `HTTP ${r.status} on ${endpoint}`);
+  }
+  return r.json();
+}
+
+async function graphPatch(endpoint, body) {
+  const token = await getToken();
+  const r = await fetch(GRAPH_BASE + endpoint, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const bd = await r.json().catch(() => ({}));
+    throw new Error(bd.error?.message || `HTTP ${r.status}`);
+  }
+  return r.json();
+}
+
+/* ══════════════════════════════════════════════════
+   EXCEL READ / WRITE
+══════════════════════════════════════════════════ */
+async function readSheet(filePath, sheetName) {
+  const fp = encodeURIComponent(filePath);
+  const sh = encodeURIComponent(sheetName);
+  const data = await graphGet(`/me/drive/root:/${fp}:/workbook/worksheets/${sh}/usedRange`);
+  return data.values || [];
+}
+
+async function writeCell(filePath, sheetName, address, value) {
+  const fp = encodeURIComponent(filePath);
+  const sh = encodeURIComponent(sheetName);
+  return graphPatch(
+    `/me/drive/root:/${fp}:/workbook/worksheets/${sh}/range(address='${address}')`,
+    { values: [[value]] }
+  );
+}
+
+// Convert 0-based column index to Excel letter (A, B, ... Z, AA, ...)
+function colLetter(idx) {
+  let letter = '', n = idx + 1;
+  while (n > 0) {
+    const rem = (n - 1) % 26;
+    letter = String.fromCharCode(65 + rem) + letter;
+    n = Math.floor((n - 1) / 26);
+  }
+  return letter;
+}
+
+// Build column name → index map from header row
+function buildColMap(headers) {
+  const m = {};
+  headers.forEach((h, i) => {
+    if (h) m[h.toString().trim().toLowerCase()] = i;
+  });
+  return m;
+}
+
+/* ══════════════════════════════════════════════════
+   DATA LOADING
+══════════════════════════════════════════════════ */
+async function loadData() {
+  setSyncStatus('syncing', 'Loading from OneDrive…');
+
+  try {
+    const [vesRaw, gyreRaw, contRaw] = await Promise.all([
+      readSheet(CFG.vesPipeline,  CFG.pipeSheet),
+      readSheet(CFG.gyrePipeline, CFG.pipeSheet),
+      readSheet(CFG.contacts,     CFG.contSheet),
+    ]);
+
+    if (!vesRaw.length || !gyreRaw.length) throw new Error('Pipeline sheets appear empty — check sheet names in setup');
+
+    const vesH  = buildColMap(vesRaw[0]);
+    const gyreH = buildColMap(gyreRaw[0]);
+    const contH = buildColMap(contRaw[0] || []);
+
+    // Build contacts lookup by name
+    const contactLookup = {};
+    (contRaw.slice(1) || []).forEach(row => {
+      const name = (row[contH['full name']] || '').toString().trim().toLowerCase();
+      if (name) contactLookup[name] = row;
+    });
+
+    // Parse pipeline rows
+    function parseRows(raw, headers, account, filePath) {
+      const todayIdx = headers[TODAY_COL.toLowerCase()];
+      return raw.slice(1).map((row, i) => {
+        const get = key => (row[headers[key]] ?? '').toString().trim();
+        return {
+          account, filePath,
+          rowIndex: i + 2, // Excel row number (1-based, +1 for header)
+          headers,
+          company:        get('company'),
+          contactName:    get('contact'),
+          opportunity:    get('opportunity'),
+          stage:          get('stage'),
+          value:          get('value (£)') || get('value'),
+          nextAction:     get('next action'),
+          nextActionDate: get('next action date'),
+          lastContact:    get('last contact'),
+          notes:          get('notes'),
+          todayFlag:      todayIdx !== undefined ? (row[todayIdx] ?? '').toString().trim() : '',
+          todayColIdx:    todayIdx,
+          // enriched from contacts
+          phone:          '',
+          email:          '',
+          linkedin:       '',
+          role:           '',
+          done:           false,
+        };
+      }).map(item => {
+        const c = contactLookup[item.contactName.toLowerCase()] || [];
+        item.phone    = (c[contH['phone']] ?? '').toString().trim();
+        item.email    = (c[contH['email']] ?? '').toString().trim();
+        item.linkedin = (c[contH['linkedin url']] ?? '').toString().trim();
+        item.role     = (c[contH['role']] ?? '').toString().trim();
+        return item;
+      });
+    }
+
+    const vesAll  = parseRows(vesRaw,  vesH,  'ves',  CFG.vesPipeline);
+    const gyreAll = parseRows(gyreRaw, gyreH, 'gyre', CFG.gyrePipeline);
+
+    const VALID_TODAY = new Set(['y', 'yes', 'true', '1', '✓', 'x']);
+    const todayList = [...vesAll, ...gyreAll].filter(c =>
+      VALID_TODAY.has(c.todayFlag.toLowerCase())
+    );
+
+    appData = { today: todayList, vesAll, gyreAll, contacts: contactLookup, vesHeaders: vesH, gyreHeaders: gyreH, contHeaders: contH };
+
+    setSyncStatus('live', `Synced · ${todayList.length} contact${todayList.length !== 1 ? 's' : ''} today`);
+    renderDateStrip();
+    renderList('all');
+    renderPipeline();
+    renderKPI();
+
+  } catch(err) {
+    setSyncStatus('error', 'Sync error — tap Refresh');
+    showToast('Load error: ' + err.message, true);
+    console.error(err);
+  }
+}
+
+async function refreshData() {
+  await loadData();
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER — LIST
+══════════════════════════════════════════════════ */
+function renderDateStrip() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('list-date-big').textContent = days[now.getDay()];
+  document.getElementById('list-date-sub').textContent =
+    `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} · Telluno`;
+  document.getElementById('kpi-period').textContent =
+    `Week ${getWeekNumber(now)} · ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+function renderList(filter = 'all') {
+  const list = appData.today;
+  const total = list.length;
+  const doneCount = list.filter(c => c.done).length;
+
+  document.getElementById('list-count').textContent =
+    doneCount > 0 ? `${doneCount}/${total} done` : `${total} today`;
+  document.getElementById('list-date-small').textContent =
+    total === 0 ? 'Add Y in TODAY column in your pipeline' :
+    `${total - doneCount} remaining · ${total} selected`;
+
+  const filtered = list.filter(c => {
+    if (filter === 'all')   return true;
+    if (filter === 'ves')   return c.account === 'ves';
+    if (filter === 'gyre')  return c.account === 'gyre';
+    if (filter === 'call')  return !!c.phone;
+    if (filter === 'email') return !!c.email;
+    return true;
+  });
+
+  const body = document.getElementById('list-body');
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <div class="empty-state-title">Nothing here</div>
+      <div class="empty-state-sub">Open your pipeline in Excel and type <strong>Y</strong> in the TODAY column for contacts you want to work on today.</div>
+    </div>`;
+    return;
+  }
+
+  // Sort: not-done priority (overdue first), then done
+  const sorted = [...filtered].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const aOver = isOverdue(a.nextActionDate);
+    const bOver = isOverdue(b.nextActionDate);
+    if (aOver !== bOver) return aOver ? -1 : 1;
+    return 0;
+  });
+
+  body.innerHTML = sorted.map((c, i) => cardHTML(c, i)).join('');
+}
+
+function isOverdue(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  return !isNaN(d.getTime()) && d < new Date();
+}
+
+function priorityClass(c) {
+  if (isOverdue(c.nextActionDate)) return 'hot';
+  const stage = c.stage.toLowerCase();
+  if (['proposal','negotiation','study sent'].includes(stage)) return 'warm';
+  return 'cool';
+}
+
+function cardHTML(c, idx) {
+  const chips = [
+    c.phone    ? `<div class="chip phone">${phoneIcon()}Call</div>` : '',
+    c.email    ? `<div class="chip email">${emailIcon()}Email</div>` : '',
+    c.linkedin ? `<div class="chip li">${liIcon()}LinkedIn</div>` : '',
+  ].filter(Boolean).join('');
+
+  const overdue = isOverdue(c.nextActionDate);
+  const badgeExtra = overdue ? ' overdue' : '';
+
+  return `<div class="card ${c.account}${c.done ? ' completed' : ''}${overdue && !c.done ? ' overdue' : ''}"
+    onclick="openDetail(${idx})" data-account="${c.account}" data-done="${c.done}">
+    <div class="card-accent"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div class="dot ${priorityClass(c)}"></div>
+          <div class="card-name">${esc(c.contactName)}</div>
+        </div>
+        <div class="card-sub">${esc(c.company)}${c.role ? ' · ' + esc(c.role) : ''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+        <div class="badge ${c.account}">${c.account.toUpperCase()}</div>
+        ${c.done ? '<div class="badge done">Done</div>' : ''}
+        ${overdue && !c.done ? '<div class="badge overdue">Overdue</div>' : ''}
+      </div>
+    </div>
+    <div class="card-note">
+      <strong>${esc(c.stage)}</strong>${c.nextAction ? ' · ' + esc(c.nextAction.slice(0,80)) : ''}
+      ${c.notes ? '<br>' + esc(c.notes.slice(0,100)) + (c.notes.length > 100 ? '…' : '') : ''}
+    </div>
+    ${chips ? `<div class="card-chips">${chips}</div>` : ''}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════
+   DETAIL VIEW
+══════════════════════════════════════════════════ */
+function openDetail(listIdx) {
+  // Find the index in the full today array matching what was rendered
+  const filter = document.querySelector('#list-filters .ftab.active')?.dataset.filter || 'all';
+  const filtered = appData.today.filter(c => {
+    if (filter === 'all')   return true;
+    if (filter === 'ves')   return c.account === 'ves';
+    if (filter === 'gyre')  return c.account === 'gyre';
+    if (filter === 'call')  return !!c.phone;
+    if (filter === 'email') return !!c.email;
+    return true;
+  }).sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const aOver = isOverdue(a.nextActionDate), bOver = isOverdue(b.nextActionDate);
+    if (aOver !== bOver) return aOver ? -1 : 1;
+    return 0;
+  });
+
+  currentContact = filtered[listIdx];
+  if (!currentContact) return;
+  const c = currentContact;
+
+  document.getElementById('d-badge').textContent   = c.account.toUpperCase();
+  document.getElementById('d-badge').className     = `badge ${c.account}`;
+  document.getElementById('d-name').textContent    = c.contactName;
+  document.getElementById('d-role').textContent    = c.role || '—';
+  document.getElementById('d-company').textContent = c.company;
+
+  // Stage pill
+  const stagePill = document.getElementById('d-stage');
+  stagePill.textContent = c.stage || '—';
+  stagePill.className   = 'stage-pill ' + stageClass(c.stage);
+
+  document.getElementById('d-value').textContent       = c.value ? '£' + c.value : '—';
+  document.getElementById('d-next-action').textContent  = c.nextAction || '—';
+  document.getElementById('d-last').textContent         = c.lastContact || '—';
+  document.getElementById('d-oppo').textContent         = c.opportunity || '—';
+
+  if (c.notes) {
+    document.getElementById('d-note').textContent     = c.notes;
+    document.getElementById('d-note-wrap').style.display = '';
+  } else {
+    document.getElementById('d-note-wrap').style.display = 'none';
+  }
+
+  // Pre-select stage selector
+  document.getElementById('stage-select').value = '';
+  document.getElementById('na-input').value = '';
+  document.getElementById('log-ta').value = '';
+  document.getElementById('draft-area').classList.remove('show');
+
+  // Reset outcome tabs
+  document.querySelectorAll('#outcome-tabs .otab').forEach((t,i) => t.classList.toggle('active', i===0));
+  currentOutcome = 'Called';
+
+  // Action buttons
+  const actionsEl = document.getElementById('d-actions');
+  actionsEl.innerHTML = '';
+
+  if (c.phone) {
+    const b = document.createElement('button');
+    b.className = 'act-btn phone';
+    b.innerHTML = `${phoneIcon()} Call`;
+    b.onclick = () => window.location.href = `tel:${c.phone}`;
+    actionsEl.appendChild(b);
+  }
+  if (c.email) {
+    const b = document.createElement('button');
+    b.className = 'act-btn email';
+    b.innerHTML = `${emailIcon()} Email`;
+    b.onclick = () => window.location.href = `mailto:${c.email}`;
+    actionsEl.appendChild(b);
+  }
+  if (c.linkedin) {
+    const b = document.createElement('button');
+    b.className = 'act-btn li';
+    b.innerHTML = `${liIcon()} LI`;
+    b.onclick = () => window.open(c.linkedin, '_blank');
+    actionsEl.appendChild(b);
+  }
+
+  showScreen('detail');
+}
+
+function stageClass(stage) {
+  const s = (stage || '').toLowerCase();
+  if (s.includes('prospect'))    return 'prospect';
+  if (s.includes('qualified'))   return 'qualified';
+  if (s.includes('study'))       return 'study';
+  if (s.includes('proposal'))    return 'proposal';
+  if (s.includes('negotiation')) return 'negotiation';
+  if (s.includes('won'))         return 'won';
+  return 'prospect';
+}
+
+/* ══════════════════════════════════════════════════
+   VOICE INPUT
+══════════════════════════════════════════════════ */
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    const ta = document.getElementById('log-ta');
+    ta.focus();
+    showToast('Tap the mic on your iPhone keyboard to speak');
+    return;
+  }
+
+  if (isListening) {
+    recognition?.stop();
+    return;
+  }
+
+  recognition = new SR();
+  recognition.lang = 'en-GB';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    const btn = document.getElementById('voice-btn');
+    btn.classList.add('listening');
+    btn.innerHTML = `${micIcon()} Listening…`;
+  };
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const ta = document.getElementById('log-ta');
+    ta.value = ta.value ? ta.value + ' ' + transcript : transcript;
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    const btn = document.getElementById('voice-btn');
+    btn.classList.remove('listening');
+    btn.innerHTML = `${micIcon()} Tap to Speak`;
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    document.getElementById('voice-btn').innerHTML = `${micIcon()} Tap to Speak`;
+    if (e.error !== 'no-speech') showToast('Voice error — try typing instead', true);
+  };
+
+  recognition.start();
+}
+
+/* ══════════════════════════════════════════════════
+   DRAFT MESSAGE GENERATION
+══════════════════════════════════════════════════ */
+function updateDraftArea() {
+  const showDraft = ['Emailed', 'LinkedIn', 'WhatsApp'].includes(currentOutcome);
+  const draftEl = document.getElementById('draft-area');
+
+  if (!showDraft || !currentContact) {
+    draftEl.classList.remove('show');
+    return;
+  }
+
+  const c = currentContact;
+  const firstName = c.contactName.split(' ')[0];
+  const isVES = c.account === 'ves';
+  let draft = '';
+
+  if (currentOutcome === 'Emailed') {
+    draft = `Hi ${firstName},\n\n` +
+      (isVES
+        ? `I wanted to follow up on AirDoor — we recently won two CIBSE awards for our entrance air barrier technology and I thought it relevant given ${c.company}'s work.\n\nThe system delivers ~95% energy savings versus overhead air curtains and features in both the Sainsbury's and Waitrose net zero sustainability reports. Happy to arrange a brief walkthrough or send our case study pack.`
+        : `I wanted to follow up on Gyre Energy's cold storage optimisation platform. Our Market Harborough trial demonstrated 36% kWh savings on a 3,000 sq ft freezer using AI-driven thermal energy storage — developed with the University of Oxford.\n\nGiven ${c.company}'s operations, I think there's a compelling case. Happy to arrange a 20-minute call.`) +
+      `\n\nBest regards,\nJohn O'Brien\nTelluno Consulting`;
+
+    document.getElementById('draft-label').textContent = 'Draft Email';
+    document.getElementById('draft-open-btn').textContent = 'Open Mail';
+  } else if (currentOutcome === 'LinkedIn') {
+    draft = `Hi ${firstName} — great to be connected. ` +
+      (isVES
+        ? `VES AirDoor won 2 CIBSE awards this year — invisible entrance air barrier, ~95% energy savings vs air curtains. Happy to share the case study or arrange a quick call if it's relevant for ${c.company}.`
+        : `Following Gyre Energy's Market Harborough trial — 36% kWh savings in cold storage using AI and thermal storage. Happy to share the case study if it's relevant for ${c.company}.`) +
+      ` John`;
+    document.getElementById('draft-label').textContent = 'Draft LinkedIn Message';
+    document.getElementById('draft-open-btn').textContent = 'Open LinkedIn';
+  } else if (currentOutcome === 'WhatsApp') {
+    draft = `Hi ${firstName}, John O'Brien here from Telluno. ` +
+      (isVES
+        ? `Quick follow-up on AirDoor — happy to send our CIBSE award case study or arrange a call at your convenience.`
+        : `Quick follow-up on Gyre Energy — happy to send the Market Harborough case study (36% kWh savings in cold storage) or arrange a call.`);
+    document.getElementById('draft-label').textContent = 'Draft WhatsApp';
+    document.getElementById('draft-open-btn').textContent = 'Open WhatsApp';
+  }
+
+  document.getElementById('draft-text').textContent = draft;
+  draftEl.classList.add('show');
+}
+
+function copyDraft() {
+  const text = document.getElementById('draft-text').textContent;
+  navigator.clipboard?.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+function openDraftTarget() {
+  const c = currentContact;
+  if (currentOutcome === 'Emailed' && c.email) {
+    const body = encodeURIComponent(document.getElementById('draft-text').textContent);
+    window.location.href = `mailto:${c.email}?body=${body}`;
+  } else if (currentOutcome === 'LinkedIn' && c.linkedin) {
+    window.open(c.linkedin, '_blank');
+  } else if (currentOutcome === 'WhatsApp' && c.phone) {
+    const text = encodeURIComponent(document.getElementById('draft-text').textContent);
+    window.open(`https://wa.me/${c.phone.replace(/\D/g,'')}?text=${text}`, '_blank');
+  } else {
+    showToast('No contact info available for this channel', true);
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   SAVE OUTCOME → EXCEL
+══════════════════════════════════════════════════ */
+async function saveOutcome() {
+  const c = currentContact;
+  if (!c) return;
+
+  const notes    = document.getElementById('log-ta').value.trim();
+  const newStage = document.getElementById('stage-select').value;
+  const newNA    = document.getElementById('na-input').value.trim();
+
+  if (!notes) {
+    document.getElementById('log-ta').focus();
+    showToast('Add a note before saving', true);
+    return;
+  }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+    const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    const stamp   = `[${dateStr} ${timeStr} · ${currentOutcome}]`;
+    const updatedNotes = c.notes
+      ? `${c.notes}\n${stamp} ${notes}`
+      : `${stamp} ${notes}`;
+
+    const h    = c.headers;
+    const row  = c.rowIndex;
+    const file = c.filePath;
+    const sh   = CFG.pipeSheet;
+
+    const writes = [];
+
+    // Notes
+    if (h['notes'] !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(h['notes'])}${row}`, updatedNotes));
+
+    // Last Contact → today
+    if (h['last contact'] !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(h['last contact'])}${row}`, dateStr));
+
+    // Week Updated → today
+    if (h['week updated'] !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(h['week updated'])}${row}`, dateStr));
+
+    // Stage change
+    if (newStage && newStage !== c.stage && h['stage'] !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(h['stage'])}${row}`, newStage));
+
+    // Next action update
+    if (newNA && h['next action'] !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(h['next action'])}${row}`, newNA));
+
+    // TODAY → Done
+    if (c.todayColIdx !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(c.todayColIdx)}${row}`, 'Done'));
+
+    await Promise.all(writes);
+
+    // Update in-memory data
+    c.notes = updatedNotes;
+    c.lastContact = dateStr;
+    if (newStage) c.stage = newStage;
+    if (newNA)    c.nextAction = newNA;
+    c.done = true;
+
+    // Add to session log
+    sessionLog.unshift({
+      name: c.contactName, company: c.company, account: c.account,
+      outcome: currentOutcome, notes, time: `${timeStr}`, date: dateStr,
+      stage: newStage || c.stage,
+    });
+    renderActivityLog();
+
+    showToast('✓ Saved to Excel pipeline');
+    document.getElementById('log-ta').value = '';
+    document.getElementById('stage-select').value = '';
+    document.getElementById('na-input').value = '';
+    document.getElementById('draft-area').classList.remove('show');
+
+    // Re-render list
+    renderList(document.querySelector('#list-filters .ftab.active')?.dataset.filter || 'all');
+
+    setTimeout(() => showScreen('list'), 700);
+
+  } catch(err) {
+    showToast('Save failed: ' + err.message, true);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save to Pipeline ↗';
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER — PIPELINE
+══════════════════════════════════════════════════ */
+function renderPipeline() {
+  const all = [...appData.vesAll, ...appData.gyreAll];
+  const today = new Date();
+
+  const overdue = all.filter(c => {
+    if (!c.nextActionDate) return false;
+    const d = new Date(c.nextActionDate);
+    return !isNaN(d) && d < today && c.stage !== 'Won' && c.stage !== 'Lost';
+  });
+
+  const highValue = all
+    .filter(c => !overdue.includes(c) && c.stage !== 'Won' && c.stage !== 'Lost')
+    .filter(c => {
+      const v = parseFloat((c.value || '0').replace(/[^0-9.]/g,''));
+      return v > 5000;
+    })
+    .sort((a,b) => {
+      const va = parseFloat((a.value||'0').replace(/[^0-9.]/g,'')),
+            vb = parseFloat((b.value||'0').replace(/[^0-9.]/g,''));
+      return vb - va;
+    })
+    .slice(0, 10);
+
+  let html = '';
+
+  if (overdue.length) {
+    html += `<div class="sect warn">⚠ Overdue Actions (${overdue.length})</div>`;
+    html += overdue.map(c => miniCardHTML(c, true)).join('');
+  }
+
+  if (highValue.length) {
+    html += `<div class="sect">High Value · Active</div>`;
+    html += highValue.map(c => miniCardHTML(c, false)).join('');
+  }
+
+  if (!overdue.length && !highValue.length) {
+    html = `<div class="empty-state">
+      <div class="empty-state-title">Pipeline loaded</div>
+      <div class="empty-state-sub">No overdue actions. All looking good.</div>
+    </div>`;
+  }
+
+  document.getElementById('pipeline-body').innerHTML = html;
+}
+
+function miniCardHTML(c, overdue) {
+  const idx = appData.today.findIndex(x => x === c);
+  const clickable = idx >= 0 ? `onclick="openDetailDirect(appData.vesAll.concat(appData.gyreAll).indexOf(arguments[0]?.currentTarget?.dataset?.ref === '${c.contactName}' ? c : null))"` : '';
+
+  return `<div class="card ${c.account}${overdue ? ' overdue' : ''}">
+    <div class="card-accent"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div>
+        <div class="card-name">${esc(c.contactName)}</div>
+        <div class="card-sub">${esc(c.company)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+        <div class="badge ${c.account}">${c.account.toUpperCase()}</div>
+        <span class="stage-pill ${stageClass(c.stage)}">${esc(c.stage)}</span>
+      </div>
+    </div>
+    <div class="card-note">
+      ${c.value ? `<strong>£${esc(c.value)}</strong> · ` : ''}${esc(c.nextAction || c.notes?.slice(0,80) || '—')}
+      ${overdue && c.nextActionDate ? ` · Due ${esc(c.nextActionDate)}` : ''}
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER — KPI DASHBOARD
+══════════════════════════════════════════════════ */
+function renderKPI() {
+  const vesAll  = appData.vesAll;
+  const gyreAll = appData.gyreAll;
+  const all     = [...vesAll, ...gyreAll];
+
+  // Stage counts
+  const stages = ['Prospect','Qualified','Study Sent','Proposal','Negotiation','Won'];
+  const vesCounts  = stageCounts(vesAll,  stages);
+  const gyreCounts = stageCounts(gyreAll, stages);
+
+  // Pipeline values
+  const vesValue  = totalValue(vesAll.filter(c => !['Won','Lost'].includes(c.stage)));
+  const gyreValue = totalValue(gyreAll.filter(c => !['Won','Lost'].includes(c.stage)));
+  const wonValue  = totalValue(all.filter(c => c.stage === 'Won'));
+
+  // Today's cadence progress
+  const todayDone = appData.today.filter(c => c.done).length;
+  const todayTotal = appData.today.length;
+
+  const maxVes  = Math.max(...Object.values(vesCounts),  1);
+  const maxGyre = Math.max(...Object.values(gyreCounts), 1);
+
+  const stageColors = {
+    'Prospect':'var(--muted)', 'Qualified':'var(--blue)',
+    'Study Sent':'var(--amber)', 'Proposal':'var(--accent)',
+    'Negotiation':'#b87aff', 'Won':'var(--green)'
+  };
+
+  let html = `
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">VES Pipeline</div>
+      <div class="kpi-val" style="color:var(--ves)">£${fmtK(vesValue)}</div>
+      <div class="kpi-delta">${vesAll.filter(c=>!['Won','Lost'].includes(c.stage)).length} active deals</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Gyre Pipeline</div>
+      <div class="kpi-val" style="color:var(--gyre)">£${fmtK(gyreValue)}</div>
+      <div class="kpi-delta">${gyreAll.filter(c=>!['Won','Lost'].includes(c.stage)).length} active deals</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Won This Year</div>
+      <div class="kpi-val" style="color:var(--green)">£${fmtK(wonValue)}</div>
+      <div class="kpi-delta">${all.filter(c=>c.stage==='Won').length} deals closed</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Today's Cadence</div>
+      <div class="kpi-val" style="color:${todayDone===todayTotal&&todayTotal>0?'var(--green)':'var(--accent)'}">${todayDone}/${todayTotal}</div>
+      <div class="kpi-delta ${todayDone===todayTotal&&todayTotal>0?'':'neutral'}">
+        ${todayDone===todayTotal&&todayTotal>0?'All done ✓':'contacts done today'}
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-title">VES — Pipeline by Stage</div>
+    ${stages.map(s => `<div class="pipe-bar-row">
+      <div class="pipe-bar-label">${s}</div>
+      <div class="pipe-bar-track"><div class="pipe-bar-fill" style="width:${Math.round(vesCounts[s]/maxVes*100)}%;background:${stageColors[s]}"></div></div>
+      <div class="pipe-bar-count">${vesCounts[s]}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-title">Gyre — Pipeline by Stage</div>
+    ${stages.map(s => `<div class="pipe-bar-row">
+      <div class="pipe-bar-label">${s}</div>
+      <div class="pipe-bar-track"><div class="pipe-bar-fill" style="width:${Math.round(gyreCounts[s]/maxGyre*100)}%;background:${stageColors[s]}"></div></div>
+      <div class="pipe-bar-count">${gyreCounts[s]}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-title">Conversion Benchmarks</div>
+    <div class="stat-row"><div class="stat-key">Prospect → Qualified target</div><div class="stat-val">20–30%</div></div>
+    <div class="stat-row"><div class="stat-key">Qualified → Study/Proposal</div><div class="stat-val">40–60%</div></div>
+    <div class="stat-row"><div class="stat-key">Proposal → Won target</div><div class="stat-val">25–35%</div></div>
+    <div class="stat-row"><div class="stat-key">Sales cycle (typical)</div><div class="stat-val">3–9 months</div></div>
+    <div class="stat-row"><div class="stat-key">New oppos/week (target)</div><div class="stat-val">1–2</div></div>
+  </div>`;
+
+  document.getElementById('kpi-body').innerHTML = html;
+}
+
+function stageCounts(rows, stages) {
+  const c = {};
+  stages.forEach(s => c[s] = 0);
+  rows.forEach(r => {
+    if (c[r.stage] !== undefined) c[r.stage]++;
+  });
+  return c;
+}
+
+function totalValue(rows) {
+  return rows.reduce((sum, r) => {
+    const v = parseFloat((r.value || '0').replace(/[^0-9.]/g,''));
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
+}
+
+function fmtK(val) {
+  if (val >= 1000000) return (val/1000000).toFixed(1) + 'm';
+  if (val >= 1000)    return (val/1000).toFixed(0) + 'k';
+  return val.toFixed(0);
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER — ACTIVITY LOG
+══════════════════════════════════════════════════ */
+function renderActivityLog() {
+  const body = document.getElementById('log-body');
+  if (!sessionLog.length) {
+    body.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div class="empty-state-title">No activity yet</div>
+      <div class="empty-state-sub">Outcomes you log today will appear here and are saved to your Excel pipeline in real time.</div>
+    </div>`;
+    return;
+  }
+
+  const outcomeColors = {
+    'Called':'var(--green)', 'Emailed':'var(--blue)', 'LinkedIn':'var(--amber)',
+    'WhatsApp':'var(--green)', 'No Answer':'var(--muted)', 'Meeting':'#b87aff'
+  };
+
+  body.innerHTML = sessionLog.map(entry => `
+    <div class="stat-card" style="margin-bottom:10px;cursor:default;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;">${esc(entry.name)}</div>
+          <div style="font-size:12px;color:var(--muted);">${esc(entry.company)} · ${entry.account.toUpperCase()}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);flex-shrink:0;">${entry.time}</div>
+      </div>
+      <div style="margin-top:9px;padding:9px;background:rgba(255,255,255,.03);border-radius:8px;font-size:13px;line-height:1.55;">
+        <span style="color:${outcomeColors[entry.outcome]||'var(--muted)'};font-size:10px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:3px;">${entry.outcome}</span>
+        ${esc(entry.notes)}
+      </div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function gotoTab(id) {
+  showScreen(id);
+  // Update nav active states
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${id}'`)) n.classList.add('active');
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   UI HELPERS
+══════════════════════════════════════════════════ */
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot ' + (state === 'syncing' ? 'syncing' : state === 'error' ? 'error' : '');
+  document.getElementById('sync-label').textContent = label;
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Loading…';
+  document.getElementById('loading').classList.remove('hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.add('hidden');
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), isError ? 3500 : 2200);
+}
+
+function esc(str) {
+  return (str || '').toString()
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// SVG icons
+function phoneIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 .91h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>`; }
+function emailIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`; }
+function liIcon(){ return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>`; }
+function micIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`; }
+
+</script>
+</body>
+</html>
