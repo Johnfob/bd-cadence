@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="BD Cadence">
 <title>Telluno BD Cadence</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
 <style>
 /* ═══════════════════ TOKENS ═══════════════════ */
 :root {
@@ -725,38 +725,52 @@ function saveSetup() {
 /* ══════════════════════════════════════════════════
    MSAL AUTH
 ══════════════════════════════════════════════════ */
-function initMsal() {
+async function initMsal() {
   showLoading('Initialising…');
   try {
-    msalInstance = new msal.PublicClientApplication({
+    if (typeof msal === 'undefined') {
+      throw new Error('MSAL library not loaded — check internet connection');
+    }
+
+    const config = {
       auth: {
-        clientId:   CFG.clientId,
-        authority:  'https://login.microsoftonline.com/common',
+        clientId:    CFG.clientId,
+        authority:   'https://login.microsoftonline.com/common',
         redirectUri: window.location.href.split('?')[0].split('#')[0],
       },
       cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
-    });
+    };
 
-    msalInstance.handleRedirectPromise().then(response => {
-      if (response) currentAccount = response.account;
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts.length > 0) {
-        currentAccount = currentAccount || accounts[0];
-        hideLoading();
-        showScreen('list');
-        loadData();
-      } else {
-        hideLoading();
-        showScreen('signin');
-      }
-    }).catch(err => {
-      console.error(err);
+    // MSAL v3 uses createPublicClientApplication (async), v2 uses constructor
+    if (msal.PublicClientApplication.createPublicClientApplication) {
+      msalInstance = await msal.PublicClientApplication.createPublicClientApplication(config);
+    } else {
+      msalInstance = new msal.PublicClientApplication(config);
+    }
+
+    await msalInstance.initialize?.();
+
+    const response = await msalInstance.handleRedirectPromise().catch(e => { console.warn(e); return null; });
+    if (response) currentAccount = response.account;
+
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      currentAccount = currentAccount || accounts[0];
+      const name = currentAccount.name || 'You';
+      const initials = name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+      const av = document.getElementById('user-avatar');
+      if (av) av.textContent = initials;
+      hideLoading();
+      showScreen('list');
+      loadData();
+    } else {
       hideLoading();
       showScreen('signin');
-    });
+    }
   } catch(e) {
+    console.error('MSAL init error:', e);
     hideLoading();
-    showToast('MSAL init failed — check Client ID', true);
+    showToast('Init failed: ' + (e.message || e), true);
     showScreen('setup');
   }
 }
@@ -767,17 +781,14 @@ async function signIn() {
     const response = await msalInstance.loginPopup({ scopes: SCOPES });
     currentAccount = response.account;
     hideLoading();
-
-    // Show username initial in avatar
     const name = currentAccount.name || 'You';
     const initials = name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
     document.getElementById('user-avatar').textContent = initials;
-
     showScreen('list');
     loadData();
   } catch(e) {
     hideLoading();
-    if (!e.message?.includes('user_cancelled')) {
+    if (!e.message?.includes('user_cancelled') && !e.message?.includes('interaction_in_progress')) {
       showToast('Sign in failed: ' + (e.message || e), true);
     }
   }
@@ -788,9 +799,13 @@ async function getToken() {
   try {
     const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
     return r.accessToken;
-  } catch {
-    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
-    return r.accessToken;
+  } catch(e) {
+    try {
+      const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES, account: currentAccount });
+      return r.accessToken;
+    } catch(e2) {
+      throw new Error('Could not get access token: ' + (e2.message || e2));
+    }
   }
 }
 
