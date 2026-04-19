@@ -903,27 +903,44 @@ async function loadData() {
       if (name) contactLookup[name] = row;
     });
 
-    // Parse pipeline rows
+    // Parse pipeline rows — updated for VES and Gyre actual column names
     function parseRows(raw, headers, account, filePath) {
       const todayIdx = headers[TODAY_COL.toLowerCase()];
+
+      function flex(row, ...keys) {
+        for (const k of keys) {
+          const idx = headers[k.toLowerCase()];
+          if (idx !== undefined) {
+            const v = (row[idx] ?? '').toString().trim();
+            if (v) return v;
+          }
+        }
+        for (const k of keys) {
+          const found = Object.keys(headers).find(h => h.includes(k.toLowerCase()));
+          if (found !== undefined) {
+            const v = (row[headers[found]] ?? '').toString().trim();
+            if (v) return v;
+          }
+        }
+        return '';
+      }
+
       return raw.slice(1).map((row, i) => {
-        const get = key => (row[headers[key]] ?? '').toString().trim();
         return {
           account, filePath,
-          rowIndex: i + 2, // Excel row number (1-based, +1 for header)
+          rowIndex: i + 2,
           headers,
-          company:        get('company'),
-          contactName:    get('contact'),
-          opportunity:    get('opportunity'),
-          stage:          get('stage'),
-          value:          get('value (£)') || get('value'),
-          nextAction:     get('next action'),
-          nextActionDate: get('next action date'),
-          lastContact:    get('last contact'),
-          notes:          get('notes'),
+          company:        flex(row, 'brand (end client)', 'brand', 'company', 'account'),
+          contactName:    flex(row, 'contact information [dept, role, name]', 'contact information', 'named opportunity', 'contact'),
+          opportunity:    flex(row, 'named opportunity', 'lead product', 'opportunity'),
+          stage:          flex(row, 'oppo status', 'stage', 'status'),
+          value:          flex(row, 'som (annual)', 'oppo qty', 'revenue', 'value (£)', 'value'),
+          nextAction:     flex(row, 'engagement priority', 'next action', 'who pays ves', 'who pays gyre'),
+          nextActionDate: flex(row, 'next action date', 'engaged? date?/ often / no'),
+          lastContact:    flex(row, 'feedback/ response to product', 'feedback/response to product', 'last contact'),
+          notes:          flex(row, 'opportunity background & status. actions [a:], risks/interdependencies [r:]', 'account history/ background to lead', 'account history', 'opportunity background & status', 'notes'),
           todayFlag:      todayIdx !== undefined ? (row[todayIdx] ?? '').toString().trim() : '',
           todayColIdx:    todayIdx,
-          // enriched from contacts
           phone:          '',
           email:          '',
           linkedin:       '',
