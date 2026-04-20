@@ -1091,9 +1091,9 @@ function cardHTML(c, idx) {
       <div style="flex:1;">
         <div style="display:flex;align-items:center;gap:7px;">
           <div class="dot ${priorityClass(c)}"></div>
-          <div class="card-name">${esc(c.contactName || c.opportunity || c.company)}</div>
+          <div class="card-name">${esc(c.company)}</div>
         </div>
-        <div class="card-sub">${esc(c.company)}${c.opportunity ? ' · ' + esc(c.opportunity) : ''}</div>
+        <div class="card-sub">${c.contactName ? esc(c.contactName) + ' · ' : ''}${esc(c.opportunity || '')}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
         <div class="badge ${c.account}">${c.account.toUpperCase()}</div>
@@ -1135,10 +1135,10 @@ function openDetail(listIdx) {
 
   document.getElementById('d-badge').textContent   = c.account.toUpperCase();
   document.getElementById('d-badge').className     = `badge ${c.account}`;
-  // Contact person name as main heading, company below
-  document.getElementById('d-name').textContent    = c.contactName || c.opportunity || c.company;
-  document.getElementById('d-role').textContent    = c.opportunity || '—';
-  document.getElementById('d-company').textContent = c.company;
+  // Brand as main heading, contact name below
+  document.getElementById('d-name').textContent    = c.company;
+  document.getElementById('d-role').textContent    = c.contactName || c.opportunity || '—';
+  document.getElementById('d-company').textContent = c.opportunity || '—';
 
   // Stage pill
   const stagePill = document.getElementById('d-stage');
@@ -1147,7 +1147,7 @@ function openDetail(listIdx) {
 
   document.getElementById('d-value').textContent       = c.value ? '£' + c.value : '—';
   document.getElementById('d-next-action').textContent  = c.nextAction || '—';
-  document.getElementById('d-last').textContent         = c.lastContact || '—';
+  document.getElementById('d-last').textContent         = fmtDate(c.lastContact);
   document.getElementById('d-oppo').textContent         = c.opportunity || '—';
 
   if (c.notes) {
@@ -1708,6 +1708,17 @@ function esc(str) {
   return (str || '').toString()
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function fmtDate(val) {
+  if (!val) return '—';
+  const s = val.toString().trim();
+  // Excel serial number (pure digits, 4-6 chars)
+  if (/^\d{4,6}$/.test(s)) {
+    const d = new Date((parseInt(s) - 25569) * 86400 * 1000);
+    if (!isNaN(d)) return d.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
+  }
+  return s || '—';
 }
 
 // SVG icons
