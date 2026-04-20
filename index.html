@@ -941,6 +941,11 @@ async function loadData() {
           notes:          flex(row, 'opportunity background & status. actions [a:], risks/interdependencies [r:]', 'account history/ background to lead', 'account history', 'opportunity background & status', 'notes'),
           todayFlag:      todayIdx !== undefined ? (row[todayIdx] ?? '').toString().trim() : '',
           todayColIdx:    todayIdx,
+          // Store write-back column indices using same flex logic on headers
+          notesColIdx:    (() => { const keys = ['opportunity background & status. actions [a:], risks/interdependencies [r:]','account history/ background to lead','account history','opportunity background & status','notes']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } for(const k of keys){ const f=Object.keys(headers).find(h=>h.includes(k.toLowerCase())); if(f!==undefined) return headers[f]; } return undefined; })(),
+          stageColIdx:    (() => { const keys = ['oppo status','stage','status']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } return undefined; })(),
+          nextActionColIdx: (() => { const keys = ['engagement priority','next action']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } return undefined; })(),
+          lastContactColIdx: (() => { const keys = ['feedback/ response to product','feedback/response to product','last contact']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } for(const k of keys){ const f=Object.keys(headers).find(h=>h.includes(k.toLowerCase())); if(f!==undefined) return headers[f]; } return undefined; })(),
           phone:          '',
           email:          '',
           linkedin:       '',
@@ -1349,25 +1354,21 @@ async function saveOutcome() {
 
     const writes = [];
 
-    // Notes
-    if (h['notes'] !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(h['notes'])}${row}`, updatedNotes));
+    // Notes — use stored index
+    if (c.notesColIdx !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(c.notesColIdx)}${row}`, updatedNotes));
 
     // Last Contact → today
-    if (h['last contact'] !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(h['last contact'])}${row}`, dateStr));
-
-    // Week Updated → today
-    if (h['week updated'] !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(h['week updated'])}${row}`, dateStr));
+    if (c.lastContactColIdx !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(c.lastContactColIdx)}${row}`, dateStr));
 
     // Stage change
-    if (newStage && newStage !== c.stage && h['stage'] !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(h['stage'])}${row}`, newStage));
+    if (newStage && newStage !== c.stage && c.stageColIdx !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, newStage));
 
     // Next action update
-    if (newNA && h['next action'] !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(h['next action'])}${row}`, newNA));
+    if (newNA && c.nextActionColIdx !== undefined)
+      writes.push(writeCell(file, sh, `${colLetter(c.nextActionColIdx)}${row}`, newNA));
 
     // TODAY → Done
     if (c.todayColIdx !== undefined)
