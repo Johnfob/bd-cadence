@@ -510,7 +510,7 @@ a{color:inherit;text-decoration:none;}
         <div class="otab" data-outcome="Meeting">Meeting</div>
       </div>
 
-      <textarea class="log-ta" id="log-ta" placeholder="What happened? Type or use your iPhone mic below…" rows="4"></textarea>
+      <textarea class="log-ta" id="log-ta" placeholder="Who did you reach out to, what happened? Type or use your iPhone mic to log the call…" rows="4"></textarea>
 
       <select class="stage-select" id="stage-select">
         <option value="">Keep current stage</option>
@@ -525,13 +525,7 @@ a{color:inherit;text-decoration:none;}
 
       <input class="na-input" id="na-input" placeholder="Update next action (optional)…">
 
-      <div class="voice-row">
-        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          Tap to Speak
-        </button>
-      </div>
-      <div class="voice-hint">Tap Speak, dictate your update, tap again to stop · Or just type</div>
+
 
       <!-- Draft message (shows for Email / LinkedIn / WhatsApp) -->
       <div class="draft-area" id="draft-area">
@@ -1342,10 +1336,12 @@ async function saveOutcome() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
     const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-    const stamp   = `[${dateStr} ${timeStr} · ${currentOutcome}]`;
+    const logStamp   = `[${dateStr} ${timeStr} · ${currentOutcome}: Log] ${notes}`;
+    const actionStamp = newNA ? `[${dateStr} ${timeStr} · Action] ${newNA}` : '';
+    const newEntries = [logStamp, actionStamp].filter(Boolean).join('\n');
     const updatedNotes = c.notes
-      ? `${c.notes}\n${stamp} ${notes}`
-      : `${stamp} ${notes}`;
+      ? `${newEntries}\n${c.notes}`
+      : newEntries;
 
     const h    = c.headers;
     const row  = c.rowIndex;
