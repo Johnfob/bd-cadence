@@ -1363,12 +1363,10 @@ async function saveOutcome() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
     const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-    const logStamp   = `[${dateStr} ${timeStr} · ${currentOutcome}: Log] ${notes}`;
-    const actionStamp = newNA ? `[${dateStr} ${timeStr} · Action] ${newNA}` : '';
-    const newEntries = [logStamp, actionStamp].filter(Boolean).join('\n');
+    const logStamp = `[${dateStr} ${timeStr} · ${currentOutcome}] ${notes}`;
     const updatedNotes = c.notes
-      ? `${newEntries}\n${c.notes}`
-      : newEntries;
+      ? `${logStamp}\n${c.notes}`
+      : logStamp;
 
     const h    = c.headers;
     const row  = c.rowIndex;
