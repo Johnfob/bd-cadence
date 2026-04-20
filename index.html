@@ -512,8 +512,9 @@ a{color:inherit;text-decoration:none;}
 
       <textarea class="log-ta" id="log-ta" placeholder="Who did you reach out to, what happened? Type or use your iPhone mic to log the call…" rows="4"></textarea>
 
-      <select class="stage-select" id="stage-select">
+      <select class="stage-select" id="stage-select" onchange="handleStageChange(this)">
         <option value="">Keep current stage</option>
+        <option value="FLAG_REVIEW" style="color:#e8c23a;">⚑ Flag for Review</option>
         <option value="Prospect">Prospect</option>
         <option value="Qualified">Qualified</option>
         <option value="Study Sent">Study Sent</option>
@@ -835,6 +836,19 @@ async function graphPatch(endpoint, body) {
 /* ══════════════════════════════════════════════════
    EXCEL READ / WRITE
 ══════════════════════════════════════════════════ */
+async function colourCell(filePath, sheetName, address, hexColor) {
+  const fp = encodeURIComponent(filePath);
+  const sh = encodeURIComponent(sheetName);
+  const token = await getToken();
+  const r = await fetch(`${GRAPH_BASE}/me/drive/root:/${fp}:/workbook/worksheets/${sh}/range(address='${address}')/format/fill`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ color: hexColor }),
+  });
+  if (!r.ok) console.warn('colourCell failed', r.status);
+  return r;
+}
+
 async function readSheet(filePath, sheetName) {
   const fp = encodeURIComponent(filePath);
   const sh = encodeURIComponent(sheetName);
@@ -925,21 +939,21 @@ async function loadData() {
           rowIndex: i + 2,
           headers,
           company:        flex(row, 'brand (end client)', 'brand', 'company', 'account'),
-          contactName:    flex(row, 'contact information [dept, role, name]', 'contact information', 'named opportunity', 'contact'),
+          contactName:    flex(row, 'current contact(s)', 'contact', 'contact information'),
           opportunity:    flex(row, 'named opportunity', 'lead product', 'opportunity'),
           stage:          flex(row, 'oppo status', 'stage', 'status'),
-          value:          flex(row, 'som (annual)', 'oppo qty', 'revenue', 'value (£)', 'value'),
-          nextAction:     flex(row, 'engagement priority', 'next action', 'who pays ves', 'who pays gyre'),
-          nextActionDate: flex(row, 'next action date', 'engaged? date?/ often / no'),
-          lastContact:    flex(row, 'feedback/ response to product', 'feedback/response to product', 'last contact'),
-          notes:          flex(row, 'opportunity background & status. actions [a:], risks/interdependencies [r:]', 'account history/ background to lead', 'account history', 'opportunity background & status', 'notes'),
+          value:          flex(row, 'oppo qty', 'som (annual)', 'revenue', 'value (£)', 'value'),
+          nextAction:     flex(row, 'next action'),
+          nextActionDate: flex(row, 'engaged? date?/ often / no', 'next action date'),
+          lastContact:    flex(row, 'last contact', 'feedback/ response to product'),
+          notes:          flex(row, 'notes', 'opportunity background & status. actions [a:], risks/interdependencies [r:]', 'account history'),
           todayFlag:      todayIdx !== undefined ? (row[todayIdx] ?? '').toString().trim() : '',
           todayColIdx:    todayIdx,
           // Store write-back column indices using same flex logic on headers
-          notesColIdx:    (() => { const keys = ['opportunity background & status. actions [a:], risks/interdependencies [r:]','account history/ background to lead','account history','opportunity background & status','notes']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } for(const k of keys){ const f=Object.keys(headers).find(h=>h.includes(k.toLowerCase())); if(f!==undefined) return headers[f]; } return undefined; })(),
-          stageColIdx:    (() => { const keys = ['oppo status','stage','status']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } return undefined; })(),
-          nextActionColIdx: (() => { const keys = ['engagement priority','next action']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } return undefined; })(),
-          lastContactColIdx: (() => { const keys = ['feedback/ response to product','feedback/response to product','last contact']; for(const k of keys){ if(headers[k.toLowerCase()]!==undefined) return headers[k.toLowerCase()]; } for(const k of keys){ const f=Object.keys(headers).find(h=>h.includes(k.toLowerCase())); if(f!==undefined) return headers[f]; } return undefined; })(),
+          notesColIdx:       headers['notes'] !== undefined ? headers['notes'] : undefined,
+          stageColIdx:       headers['oppo status'] !== undefined ? headers['oppo status'] : undefined,
+          nextActionColIdx:  headers['next action'] !== undefined ? headers['next action'] : undefined,
+          lastContactColIdx: headers['last contact'] !== undefined ? headers['last contact'] : undefined,
           phone:          '',
           email:          '',
           linkedin:       '',
@@ -1077,9 +1091,9 @@ function cardHTML(c, idx) {
       <div style="flex:1;">
         <div style="display:flex;align-items:center;gap:7px;">
           <div class="dot ${priorityClass(c)}"></div>
-          <div class="card-name">${esc(c.contactName)}</div>
+          <div class="card-name">${esc(c.contactName || c.opportunity || c.company)}</div>
         </div>
-        <div class="card-sub">${esc(c.company)}${c.role ? ' · ' + esc(c.role) : ''}</div>
+        <div class="card-sub">${esc(c.company)}${c.opportunity ? ' · ' + esc(c.opportunity) : ''}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
         <div class="badge ${c.account}">${c.account.toUpperCase()}</div>
@@ -1121,8 +1135,9 @@ function openDetail(listIdx) {
 
   document.getElementById('d-badge').textContent   = c.account.toUpperCase();
   document.getElementById('d-badge').className     = `badge ${c.account}`;
-  document.getElementById('d-name').textContent    = c.contactName;
-  document.getElementById('d-role').textContent    = c.role || '—';
+  // Contact person name as main heading, company below
+  document.getElementById('d-name').textContent    = c.contactName || c.opportunity || c.company;
+  document.getElementById('d-role').textContent    = c.opportunity || '—';
   document.getElementById('d-company').textContent = c.company;
 
   // Stage pill
@@ -1314,6 +1329,18 @@ function openDraftTarget() {
 /* ══════════════════════════════════════════════════
    SAVE OUTCOME → EXCEL
 ══════════════════════════════════════════════════ */
+function handleStageChange(el) {
+  if (el.value === 'FLAG_REVIEW') {
+    el.style.color = '#e8c23a';
+    el.style.borderColor = 'rgba(232,194,58,0.5)';
+    el.style.background = 'rgba(232,194,58,0.08)';
+  } else {
+    el.style.color = '';
+    el.style.borderColor = '';
+    el.style.background = '';
+  }
+}
+
 async function saveOutcome() {
   const c = currentContact;
   if (!c) return;
@@ -1359,8 +1386,17 @@ async function saveOutcome() {
       writes.push(writeCell(file, sh, `${colLetter(c.lastContactColIdx)}${row}`, dateStr));
 
     // Stage change
-    if (newStage && newStage !== c.stage && c.stageColIdx !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, newStage));
+    if (newStage && newStage !== c.stage && c.stageColIdx !== undefined) {
+      const stageValue = newStage === 'FLAG_REVIEW' ? c.stage : newStage;
+      writes.push(writeCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, stageValue));
+      // If flagged for review, colour the stage cell orange
+      if (newStage === 'FLAG_REVIEW') {
+        writes.push(colourCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, 'FF8C00'));
+      }
+    } else if (newStage === 'FLAG_REVIEW' && c.stageColIdx !== undefined) {
+      // Stage unchanged but flag selected — just colour the cell
+      writes.push(colourCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, 'FF8C00'));
+    }
 
     // Next action update
     if (newNA && c.nextActionColIdx !== undefined)
