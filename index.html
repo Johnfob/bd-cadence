@@ -397,7 +397,7 @@ a{color:inherit;text-decoration:none;}
         <div class="topbar-sub" id="list-date-sub">Loading…</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button onclick="showScreen('new-lead')" style="width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <button onclick="openNewLead()" style="width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <div class="avatar" id="user-avatar">JO</div>
@@ -1959,14 +1959,11 @@ async function saveNewLead() {
   }
 }
 
-// Init new lead form defaults when screen shows
-const _origShowScreen = showScreen;
-function showScreen(id) {
-  _origShowScreen(id);
-  if (id === 'new-lead') {
-    selectNLAccount('gyre');
-    selectNLToday(false);
-  }
+// Init new lead form when opened via + button
+function openNewLead() {
+  selectNLAccount('gyre');
+  selectNLToday(false);
+  showScreen('new-lead');
 }
 </script>
 </body>
