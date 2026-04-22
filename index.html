@@ -396,7 +396,12 @@ a{color:inherit;text-decoration:none;}
         <div class="topbar-title">BD Cadence</div>
         <div class="topbar-sub" id="list-date-sub">Loading…</div>
       </div>
-      <div class="avatar" id="user-avatar">JO</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showScreen('new-lead')" style="width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="avatar" id="user-avatar">JO</div>
+      </div>
     </div>
   </div>
 
@@ -625,6 +630,67 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
+<!--  SCREEN: NEW LEAD                                  -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="screen-new-lead" class="screen">
+  <div class="topbar">
+    <div class="topbar-row">
+      <button class="back-btn" onclick="showScreen('list')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Today's List
+      </button>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent);">New Lead</div>
+    </div>
+  </div>
+
+  <div class="scroll-body">
+
+    <div class="stat-card" style="margin-bottom:12px;">
+      <div class="stat-card-title">Lead Details</div>
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Account *</label>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button id="nl-ves-btn" onclick="selectNLAccount('ves')" style="flex:1;padding:10px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;">VES</button>
+        <button id="nl-gyre-btn" onclick="selectNLAccount('gyre')" style="flex:1;padding:10px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;">Gyre</button>
+      </div>
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Company / Brand *</label>
+      <input class="na-input" id="nl-company" placeholder="e.g. Moy Park, Dale Farm…" style="margin-top:0;margin-bottom:12px;">
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Contact Name</label>
+      <input class="na-input" id="nl-contact" placeholder="Name, role (optional)" style="margin-top:0;margin-bottom:12px;">
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Opportunity / Context</label>
+      <input class="na-input" id="nl-opportunity" placeholder="e.g. 4 cold store rooms, Craigavon site" style="margin-top:0;margin-bottom:12px;">
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Stage</label>
+      <select class="stage-select" id="nl-stage" style="margin-top:0;margin-bottom:12px;">
+        <option value="Prospect Identified">Prospect Identified</option>
+        <option value="Initial Contact Established">Initial Contact Established</option>
+        <option value="Qualified">Qualified</option>
+        <option value="Study Sent">Study Sent</option>
+        <option value="Proposal">Proposal</option>
+      </select>
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Notes</label>
+      <textarea class="log-ta" id="nl-notes" placeholder="Source, context, why relevant…" rows="3" style="margin-bottom:12px;"></textarea>
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Next Action</label>
+      <input class="na-input" id="nl-next-action" placeholder="What's the first step?" style="margin-top:0;margin-bottom:4px;">
+
+      <label style="font-size:12px;color:var(--muted);display:block;margin-top:12px;margin-bottom:4px;">Add to Today's list?</label>
+      <div style="display:flex;gap:8px;margin-bottom:4px;">
+        <button id="nl-today-yes" onclick="selectNLToday(true)" style="flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;">Yes — add Y</button>
+        <button id="nl-today-no" onclick="selectNLToday(false)" style="flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(58,232,160,.3);background:rgba(58,232,160,.08);color:var(--green);transition:all .15s;">No — save only</button>
+      </div>
+    </div>
+
+    <button class="save-btn" id="nl-save-btn" onclick="saveNewLead()">Add to Pipeline ↗</button>
+    <div class="spacer"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 </div><!-- /app -->
@@ -791,14 +857,34 @@ async function signIn() {
 
 async function getToken() {
   if (!currentAccount) throw new Error('Not signed in');
+  // Clear any stuck interaction state
+  try {
+    const keys = Object.keys(sessionStorage).filter(k => k.includes('interaction') || k.includes('msal'));
+    keys.forEach(k => sessionStorage.removeItem(k));
+  } catch(e) {}
   try {
     const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
     return r.accessToken;
   } catch(e) {
+    // If interaction in progress, wait and retry once
+    if (e.message?.includes('interaction_in_progress')) {
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const r2 = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
+        return r2.accessToken;
+      } catch(e2) {}
+    }
     try {
       const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES, account: currentAccount });
       return r.accessToken;
     } catch(e2) {
+      if (e2.message?.includes('interaction_in_progress')) {
+        // Clear all MSAL cache and redirect to sign in
+        msalInstance.clearCache?.();
+        currentAccount = null;
+        showScreen('signin');
+        throw new Error('Please sign in again');
+      }
       throw new Error('Could not get access token: ' + (e2.message || e2));
     }
   }
@@ -988,7 +1074,13 @@ async function loadData() {
 
   } catch(err) {
     setSyncStatus('error', 'Sync error — tap Refresh');
-    showToast('Load error: ' + err.message, true);
+    const msg = err.message || '';
+    if (msg.includes('interaction_in_progress') || msg.includes('sign in')) {
+      showToast('Session expired — tap Refresh to sign in again', true);
+      setTimeout(() => { currentAccount = null; showScreen('signin'); }, 2000);
+    } else {
+      showToast('Load error: ' + msg, true);
+    }
     console.error(err);
   }
 }
@@ -1725,6 +1817,157 @@ function emailIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="curre
 function liIcon(){ return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>`; }
 function micIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`; }
 
+
+/* ══════════════════════════════════════════════════
+   NEW LEAD
+══════════════════════════════════════════════════ */
+let nlAccount = 'gyre'; // default
+let nlAddToday = false;
+
+function selectNLAccount(acc) {
+  nlAccount = acc;
+  const vesBtn  = document.getElementById('nl-ves-btn');
+  const gyreBtn = document.getElementById('nl-gyre-btn');
+  if (acc === 'ves') {
+    vesBtn.style.background  = 'rgba(232,97,58,.15)';
+    vesBtn.style.borderColor = 'var(--ves)';
+    vesBtn.style.color       = 'var(--ves)';
+    gyreBtn.style.background = 'var(--surface)';
+    gyreBtn.style.borderColor= 'var(--border)';
+    gyreBtn.style.color      = 'var(--muted)';
+  } else {
+    gyreBtn.style.background  = 'rgba(58,143,232,.15)';
+    gyreBtn.style.borderColor = 'var(--gyre)';
+    gyreBtn.style.color       = 'var(--gyre)';
+    vesBtn.style.background  = 'var(--surface)';
+    vesBtn.style.borderColor = 'var(--border)';
+    vesBtn.style.color       = 'var(--muted)';
+  }
+}
+
+function selectNLToday(addIt) {
+  nlAddToday = addIt;
+  const yesBtn = document.getElementById('nl-today-yes');
+  const noBtn  = document.getElementById('nl-today-no');
+  if (addIt) {
+    yesBtn.style.background  = 'rgba(58,232,160,.12)';
+    yesBtn.style.borderColor = 'rgba(58,232,160,.3)';
+    yesBtn.style.color       = 'var(--green)';
+    noBtn.style.background   = 'var(--surface)';
+    noBtn.style.borderColor  = 'var(--border)';
+    noBtn.style.color        = 'var(--muted)';
+  } else {
+    noBtn.style.background   = 'rgba(58,232,160,.08)';
+    noBtn.style.borderColor  = 'rgba(58,232,160,.3)';
+    noBtn.style.color        = 'var(--green)';
+    yesBtn.style.background  = 'var(--surface)';
+    yesBtn.style.borderColor = 'var(--border)';
+    yesBtn.style.color       = 'var(--muted)';
+  }
+}
+
+async function saveNewLead() {
+  const company   = document.getElementById('nl-company').value.trim();
+  const contact   = document.getElementById('nl-contact').value.trim();
+  const oppo      = document.getElementById('nl-opportunity').value.trim();
+  const stage     = document.getElementById('nl-stage').value;
+  const notes     = document.getElementById('nl-notes').value.trim();
+  const nextAction= document.getElementById('nl-next-action').value.trim();
+
+  if (!company) {
+    document.getElementById('nl-company').focus();
+    showToast('Company name is required', true);
+    return;
+  }
+
+  const btn = document.getElementById('nl-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const filePath = nlAccount === 'ves' ? CFG.vesPipeline : CFG.gyrePipeline;
+    const sh = CFG.pipeSheet;
+    const fp = encodeURIComponent(filePath);
+    const shE = encodeURIComponent(sh);
+
+    // Get used range to find next empty row
+    const rangeData = await graphGet(`/me/drive/root:/${fp}:/workbook/worksheets/${shE}/usedRange`);
+    const nextRow = (rangeData.rowCount || 1) + 1;
+
+    // Build row values matching column structure:
+    // A=Brand, F=Oppo Status, L=Named Opportunity, M=Notes, N=Next Action, O=TODAY, P=Current Contact(s)
+    const token = await getToken();
+    const now   = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
+    const noteStamp = notes ? `[${dateStr} · New Lead] ${notes}` : '';
+
+    // Write each field to its column
+    const writes = [];
+    const colMap = { 'A':0,'F':5,'L':11,'M':12,'N':13,'O':14,'P':15 };
+
+    const fields = [
+      ['A', company],
+      ['F', stage],
+      ['L', oppo],
+      ['M', noteStamp],
+      ['N', nextAction],
+      ['O', nlAddToday ? 'Y' : ''],
+      ['P', contact],
+    ];
+
+    for (const [col, val] of fields) {
+      if (val) {
+        writes.push(writeCell(filePath, sh, `${col}${nextRow}`, val));
+      }
+    }
+
+    await Promise.all(writes);
+
+    // Log to session log
+    sessionLog.unshift({
+      name: contact || company, company,
+      account: nlAccount, outcome: 'New Lead',
+      notes: `${oppo ? oppo + ' · ' : ''}${notes || 'Added to pipeline'}`,
+      time: now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+      date: dateStr, stage,
+    });
+    renderActivityLog();
+
+    showToast(`✓ ${company} added to ${nlAccount.toUpperCase()} pipeline`);
+
+    // Reset form
+    document.getElementById('nl-company').value    = '';
+    document.getElementById('nl-contact').value    = '';
+    document.getElementById('nl-opportunity').value= '';
+    document.getElementById('nl-notes').value      = '';
+    document.getElementById('nl-next-action').value= '';
+    document.getElementById('nl-stage').value      = 'Prospect Identified';
+    nlAddToday = false;
+    selectNLToday(false);
+    selectNLAccount('gyre');
+
+    // Reload data so new lead appears
+    await refreshData();
+    setTimeout(() => showScreen('list'), 600);
+
+  } catch(err) {
+    showToast('Save failed: ' + err.message, true);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add to Pipeline ↗';
+  }
+}
+
+// Init new lead form defaults when screen shows
+const _origShowScreen = showScreen;
+function showScreen(id) {
+  _origShowScreen(id);
+  if (id === 'new-lead') {
+    selectNLAccount('gyre');
+    selectNLToday(false);
+  }
+}
 </script>
 </body>
 </html>
