@@ -23,6 +23,7 @@
   --red:      #e83a5a;
   --ves:      #e8613a;
   --gyre:     #3a8fe8;
+  --telluno:  #9b3ae8;
   --text:     #eef0f7;
   --muted:    #7a849e;
   --radius:   14px;
@@ -81,7 +82,7 @@ a{color:inherit;text-decoration:none;}
 .card-accent{position:absolute;left:0;top:0;bottom:0;width:3px;}
 .card.ves .card-accent{background:var(--ves);}
 .card.gyre .card-accent{background:var(--gyre);}
-.card.telluno .card-accent{background:#9b3ae8;}
+.card.telluno .card-accent{background:var(--telluno);}
 .card-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;line-height:1.2;}
 .card-sub{font-size:12px;color:var(--muted);margin-top:2px;}
 .card-note{margin-top:9px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.5;}
@@ -99,6 +100,7 @@ a{color:inherit;text-decoration:none;}
 .badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
 .badge.ves{background:rgba(232,97,58,.15);color:var(--ves);}
 .badge.gyre{background:rgba(58,143,232,.15);color:var(--gyre);}
+.badge.telluno{background:rgba(155,58,232,.15);color:var(--telluno);}
 .badge.done{background:rgba(58,232,160,.15);color:var(--green);}
 .badge.overdue{background:rgba(232,58,90,.15);color:var(--red);}
 
@@ -116,6 +118,10 @@ a{color:inherit;text-decoration:none;}
 .stage-pill.proposal{background:rgba(232,97,58,.15);color:var(--accent);}
 .stage-pill.negotiation{background:rgba(155,58,232,.15);color:#b87aff;}
 .stage-pill.won{background:rgba(58,232,160,.15);color:var(--green);}
+.stage-pill.hot{background:rgba(232,97,58,.15);color:var(--accent);}
+.stage-pill.warm-tier{background:rgba(232,194,58,.15);color:var(--amber);}
+.stage-pill.network{background:rgba(155,58,232,.15);color:#b87aff;}
+.stage-pill.pipeline{background:rgba(122,132,158,.15);color:var(--muted);}
 
 /* ═══════════════════ SECTION HEADERS ═══════════════════ */
 .sect{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:14px 0 8px;}
@@ -174,23 +180,6 @@ a{color:inherit;text-decoration:none;}
 .na-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 12px;outline:none;margin-top:10px;transition:border-color .15s;}
 .na-input:focus{border-color:var(--accent);}
 .na-input::placeholder{color:var(--muted);}
-
-.voice-row{display:flex;gap:8px;margin-top:10px;align-items:center;}
-.voice-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;background:rgba(232,97,58,.1);color:var(--accent);border:1px solid rgba(232,97,58,.3);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
-.voice-btn.listening{background:rgba(232,97,58,.25);animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,97,58,.4)}50%{box-shadow:0 0 0 8px rgba(232,97,58,0)}}
-.voice-btn svg{width:16px;height:16px;}
-.voice-hint{font-size:11px;color:var(--muted);line-height:1.4;}
-
-/* Draft area */
-.draft-area{background:rgba(58,143,232,.06);border:1px solid rgba(58,143,232,.2);border-radius:10px;padding:12px;margin-top:10px;display:none;}
-.draft-area.show{display:block;}
-.draft-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--blue);font-weight:700;margin-bottom:7px;}
-.draft-text{font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--text);}
-.draft-actions{display:flex;gap:8px;margin-top:10px;}
-.draft-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
-.draft-btn:active{background:var(--border);}
-.draft-btn svg{width:12px;height:12px;}
 
 .save-btn{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;margin-top:12px;letter-spacing:.3px;}
 .save-btn:active{background:#d4522f;transform:scale(.98);}
@@ -272,6 +261,7 @@ a{color:inherit;text-decoration:none;}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
 .sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
 .sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,97,58,.4)}50%{box-shadow:0 0 0 8px rgba(232,97,58,0)}}
 
 /* Spacer */
 .spacer{height:20px;}
@@ -280,18 +270,14 @@ a{color:inherit;text-decoration:none;}
 <body>
 <div class="app" id="app">
 
-<!-- ══════════════════════════════════════════ -->
-<!--  LOADING OVERLAY                          -->
-<!-- ══════════════════════════════════════════ -->
+<!-- LOADING OVERLAY -->
 <div class="loading-screen" id="loading">
   <div class="spinner"></div>
   <div class="loading-title">BD Cadence</div>
   <div class="loading-text" id="loading-text">Starting up…</div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: SETUP                            -->
-<!-- ══════════════════════════════════════════ -->
+<!-- SETUP SCREEN -->
 <div id="screen-setup" class="screen" style="overflow-y:auto;">
   <div class="setup-screen">
     <div class="setup-logo">Telluno <span>BD</span></div>
@@ -322,12 +308,14 @@ a{color:inherit;text-decoration:none;}
       <div class="setup-step-num">Step 2 of 4</div>
       <div class="setup-step-title">Add a TODAY column to your pipeline files</div>
       <div class="setup-step-body">
-        Open <b>VES_Pipeline.xlsx</b> and <b>Gyre_Pipeline.xlsx</b> in Excel. Add a new column header called <code>TODAY</code> (column M is recommended, after Week Updated).
+        Open <b>VES_Pipeline.xlsx</b>, <b>Gyre_Pipeline.xlsx</b> and <b>Telluno_Pipeline.xlsx</b> in Excel. Each must have a column header called <code>TODAY</code> (for VES/Gyre, column M is recommended; for Telluno, this column already exists at column S).
         <br><br>Each evening or morning, type <code>Y</code> in the TODAY column for every contact you want on that day's cadence list. The tool filters on this — it won't show anyone without a Y.
         <br><br>After logging an outcome, the tool automatically changes that cell to <code>Done</code> so your list self-manages.
       </div>
-      <label class="setup-label">Pipeline sheet name (default: Pipeline):</label>
+      <label class="setup-label">VES/Gyre pipeline sheet name:</label>
       <input class="setup-input" id="setup-pipe-sheet" placeholder="Pipeline" value="Pipeline">
+      <label class="setup-label">Telluno pipeline sheet name:</label>
+      <input class="setup-input" id="setup-telluno-sheet" placeholder="Telluno Outreach" value="Telluno Outreach">
     </div>
 
     <div class="setup-step">
@@ -340,7 +328,9 @@ a{color:inherit;text-decoration:none;}
       <input class="setup-input" id="setup-ves" placeholder="Telluno/VES_Pipeline.xlsx" value="Telluno/VES_Pipeline.xlsx">
       <label class="setup-label">Gyre Pipeline path:</label>
       <input class="setup-input" id="setup-gyre" placeholder="Telluno/Gyre_Pipeline.xlsx" value="Telluno/Gyre_Pipeline.xlsx">
-      <label class="setup-label">Master Contacts path:</label>
+      <label class="setup-label">Telluno Pipeline (CRM) path:</label>
+      <input class="setup-input" id="setup-telluno" placeholder="Telluno BD/TELLUNO_PIPELINE_Outreach_19MAY2026_v14.xlsx" value="Telluno BD/TELLUNO_PIPELINE_Outreach_19MAY2026_v14.xlsx">
+      <label class="setup-label">Master Contacts path (for VES/Gyre only):</label>
       <input class="setup-input" id="setup-contacts" placeholder="Telluno/Telluno_Contacts.xlsx" value="Telluno/Telluno_Contacts.xlsx">
       <label class="setup-label">Contacts sheet name:</label>
       <input class="setup-input" id="setup-cont-sheet" placeholder="Contacts" value="Contacts">
@@ -368,16 +358,14 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: SIGN IN                          -->
-<!-- ══════════════════════════════════════════ -->
+<!-- SIGN IN -->
 <div id="screen-signin" class="screen">
   <div class="signin-screen">
     <div class="signin-mark">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
     </div>
     <div class="signin-title">Telluno BD Cadence</div>
-    <div class="signin-sub">Sign in with your Microsoft 365 account to access your pipeline and contacts.</div>
+    <div class="signin-sub">Sign in with your Microsoft 365 account to access your pipelines and contacts.</div>
     <button class="signin-btn" onclick="signIn()">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 2.5H2.5v9h9v-9zM21.5 2.5h-9v9h9v-9zM11.5 12.5h-9v9h9v-9zM21.5 12.5h-9v9h9v-9z"/></svg>
       Sign in with Microsoft
@@ -386,9 +374,7 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: TODAY'S LIST                     -->
-<!-- ══════════════════════════════════════════ -->
+<!-- TODAY'S LIST -->
 <div id="screen-list" class="screen">
   <div class="topbar">
     <div class="topbar-row">
@@ -397,9 +383,6 @@ a{color:inherit;text-decoration:none;}
         <div class="topbar-sub" id="list-date-sub">Loading…</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button onclick="openNewLead()" style="width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
         <div class="avatar" id="user-avatar">JO</div>
       </div>
     </div>
@@ -424,8 +407,10 @@ a{color:inherit;text-decoration:none;}
       <div class="ftab active" data-filter="all">All</div>
       <div class="ftab" data-filter="ves">VES</div>
       <div class="ftab" data-filter="gyre">Gyre</div>
+      <div class="ftab" data-filter="telluno">Telluno</div>
       <div class="ftab" data-filter="call">Call</div>
       <div class="ftab" data-filter="email">Email</div>
+      <div class="ftab" data-filter="li">LinkedIn</div>
     </div>
 
     <div id="list-body">
@@ -457,9 +442,7 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: CONTACT DETAIL                   -->
-<!-- ══════════════════════════════════════════ -->
+<!-- CONTACT DETAIL -->
 <div id="screen-detail" class="screen">
   <div class="detail-header">
     <div class="topbar-row">
@@ -479,10 +462,10 @@ a{color:inherit;text-decoration:none;}
     <div class="stat-card">
       <div class="stat-card-title">Pipeline Status</div>
       <div class="stat-row">
-        <div class="stat-key">Stage</div>
+        <div class="stat-key">Stage / Status</div>
         <div class="stat-val"><span class="stage-pill qualified" id="d-stage">—</span></div>
       </div>
-      <div class="stat-row">
+      <div class="stat-row" id="d-value-row">
         <div class="stat-key">Value</div>
         <div class="stat-val" id="d-value">—</div>
       </div>
@@ -495,7 +478,7 @@ a{color:inherit;text-decoration:none;}
         <div class="stat-val" id="d-last">—</div>
       </div>
       <div class="stat-row">
-        <div class="stat-key">Opportunity</div>
+        <div class="stat-key">Opportunity / Context</div>
         <div class="stat-val" id="d-oppo">—</div>
       </div>
       <div class="stat-note" id="d-note-wrap" style="display:none;">
@@ -515,7 +498,7 @@ a{color:inherit;text-decoration:none;}
         <div class="otab" data-outcome="Meeting">Meeting</div>
       </div>
 
-      <textarea class="log-ta" id="log-ta" placeholder="Who did you reach out to, what happened? Type or use your iPhone mic to log the call…" rows="4"></textarea>
+      <textarea class="log-ta" id="log-ta" placeholder="What happened? Type or use your iPhone mic. The app does NOT generate templates — every message is yours, tailored." rows="4"></textarea>
 
       <select class="stage-select" id="stage-select" onchange="handleStageChange(this)">
         <option value="">Keep current stage</option>
@@ -527,27 +510,13 @@ a{color:inherit;text-decoration:none;}
         <option value="Negotiation">Negotiation</option>
         <option value="Won">Won</option>
         <option value="Lost">Lost</option>
+        <option value="Hot">Hot (Telluno)</option>
+        <option value="Warm">Warm (Telluno)</option>
+        <option value="Pipeline">Pipeline (Telluno)</option>
+        <option value="Network">Network (Telluno)</option>
       </select>
 
       <input class="na-input" id="na-input" placeholder="Update next action (optional)…">
-
-
-
-      <!-- Draft message (shows for Email / LinkedIn / WhatsApp) -->
-      <div class="draft-area" id="draft-area">
-        <div class="draft-label" id="draft-label">Draft Message</div>
-        <div class="draft-text" id="draft-text"></div>
-        <div class="draft-actions">
-          <button class="draft-btn" onclick="copyDraft()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-          <button class="draft-btn" id="draft-open-btn" onclick="openDraftTarget()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Open
-          </button>
-        </div>
-      </div>
 
       <button class="save-btn" id="save-btn" onclick="saveOutcome()">Save to Pipeline ↗</button>
     </div>
@@ -556,15 +525,13 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: PIPELINE                         -->
-<!-- ══════════════════════════════════════════ -->
+<!-- PIPELINE SCREEN -->
 <div id="screen-pipeline" class="screen">
   <div class="topbar">
     <div class="topbar-row">
       <div>
         <div class="topbar-title">Pipeline</div>
-        <div class="topbar-sub">Live · Both Accounts</div>
+        <div class="topbar-sub">Live · All Accounts</div>
       </div>
     </div>
   </div>
@@ -582,9 +549,7 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: KPI DASHBOARD                    -->
-<!-- ══════════════════════════════════════════ -->
+<!-- KPI DASHBOARD -->
 <div id="screen-kpi" class="screen">
   <div class="topbar">
     <div class="topbar-row">
@@ -603,9 +568,7 @@ a{color:inherit;text-decoration:none;}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  SCREEN: ACTIVITY LOG                     -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ACTIVITY LOG -->
 <div id="screen-log" class="screen">
   <div class="topbar">
     <div class="topbar-row">
@@ -617,7 +580,7 @@ a{color:inherit;text-decoration:none;}
       <div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <div class="empty-state-title">No activity yet</div>
-        <div class="empty-state-sub">Outcomes you log during this session will appear here. They're saved to your Excel pipeline immediately.</div>
+        <div class="empty-state-sub">Outcomes you log during this session will appear here. They're saved to your Excel pipelines immediately.</div>
       </div>
     </div>
     <div class="spacer"></div>
@@ -627,67 +590,6 @@ a{color:inherit;text-decoration:none;}
     <div class="nav-item" onclick="gotoTab('pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Pipeline</span></div>
     <div class="nav-item" onclick="gotoTab('kpi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>KPIs</span></div>
     <div class="nav-item active" onclick="gotoTab('log')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Log</span></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════ -->
-<!--  SCREEN: NEW LEAD                                  -->
-<!-- ══════════════════════════════════════════════════ -->
-<div id="screen-new-lead" class="screen">
-  <div class="topbar">
-    <div class="topbar-row">
-      <button class="back-btn" onclick="showScreen('list')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        Today's List
-      </button>
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent);">New Lead</div>
-    </div>
-  </div>
-
-  <div class="scroll-body">
-
-    <div class="stat-card" style="margin-bottom:12px;">
-      <div class="stat-card-title">Lead Details</div>
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Account *</label>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <button id="nl-ves-btn" onclick="selectNLAccount('ves')" style="flex:1;padding:10px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;">VES</button>
-        <button id="nl-gyre-btn" onclick="selectNLAccount('gyre')" style="flex:1;padding:10px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;">Gyre</button>
-      </div>
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Company / Brand *</label>
-      <input class="na-input" id="nl-company" placeholder="e.g. Moy Park, Dale Farm…" style="margin-top:0;margin-bottom:12px;">
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Contact Name</label>
-      <input class="na-input" id="nl-contact" placeholder="Name, role (optional)" style="margin-top:0;margin-bottom:12px;">
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Opportunity / Context</label>
-      <input class="na-input" id="nl-opportunity" placeholder="e.g. 4 cold store rooms, Craigavon site" style="margin-top:0;margin-bottom:12px;">
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Stage</label>
-      <select class="stage-select" id="nl-stage" style="margin-top:0;margin-bottom:12px;">
-        <option value="Prospect Identified">Prospect Identified</option>
-        <option value="Initial Contact Established">Initial Contact Established</option>
-        <option value="Qualified">Qualified</option>
-        <option value="Study Sent">Study Sent</option>
-        <option value="Proposal">Proposal</option>
-      </select>
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Notes</label>
-      <textarea class="log-ta" id="nl-notes" placeholder="Source, context, why relevant…" rows="3" style="margin-bottom:12px;"></textarea>
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Next Action</label>
-      <input class="na-input" id="nl-next-action" placeholder="What's the first step?" style="margin-top:0;margin-bottom:4px;">
-
-      <label style="font-size:12px;color:var(--muted);display:block;margin-top:12px;margin-bottom:4px;">Add to Today's list?</label>
-      <div style="display:flex;gap:8px;margin-bottom:4px;">
-        <button id="nl-today-yes" onclick="selectNLToday(true)" style="flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;">Yes — add Y</button>
-        <button id="nl-today-no" onclick="selectNLToday(false)" style="flex:1;padding:9px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(58,232,160,.3);background:rgba(58,232,160,.08);color:var(--green);transition:all .15s;">No — save only</button>
-      </div>
-    </div>
-
-    <button class="save-btn" id="nl-save-btn" onclick="saveNewLead()">Add to Pipeline ↗</button>
-    <div class="spacer"></div>
   </div>
 </div>
 
@@ -702,12 +604,14 @@ a{color:inherit;text-decoration:none;}
    CONFIG — persisted to localStorage after setup
 ══════════════════════════════════════════════════ */
 const CFG = {
-  get clientId()    { return localStorage.getItem('tc_cid') || ''; },
-  get vesPipeline() { return localStorage.getItem('tc_ves') || 'Telluno/VES_Pipeline.xlsx'; },
-  get gyrePipeline(){ return localStorage.getItem('tc_gyre') || 'Telluno/Gyre_Pipeline.xlsx'; },
-  get contacts()    { return localStorage.getItem('tc_cont') || 'Telluno/Telluno_Contacts.xlsx'; },
-  get pipeSheet()   { return localStorage.getItem('tc_ps') || 'Pipeline'; },
-  get contSheet()   { return localStorage.getItem('tc_cs') || 'Contacts'; },
+  get clientId()      { return localStorage.getItem('tc_cid')      || ''; },
+  get vesPipeline()   { return localStorage.getItem('tc_ves')      || 'Telluno/VES_Pipeline.xlsx'; },
+  get gyrePipeline()  { return localStorage.getItem('tc_gyre')     || 'Telluno/Gyre_Pipeline.xlsx'; },
+  get tellunoPipeline(){ return localStorage.getItem('tc_telluno') || 'Telluno BD/TELLUNO_PIPELINE_Outreach_19MAY2026_v14.xlsx'; },
+  get contacts()      { return localStorage.getItem('tc_cont')     || 'Telluno/Telluno_Contacts.xlsx'; },
+  get pipeSheet()     { return localStorage.getItem('tc_ps')       || 'Pipeline'; },
+  get tellunoSheet()  { return localStorage.getItem('tc_ts')       || 'Telluno Outreach'; },
+  get contSheet()     { return localStorage.getItem('tc_cs')       || 'Contacts'; },
 };
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
@@ -716,30 +620,28 @@ const TODAY_COL  = 'TODAY';
 
 let msalInstance = null;
 let currentAccount = null;
-let appData = { today: [], vesAll: [], gyreAll: [], contacts: {}, vesHeaders: [], gyreHeaders: [], contHeaders: [] };
+let appData = { today: [], vesAll: [], gyreAll: [], tellunoAll: [], contacts: {} };
 let currentContact = null;
 let currentOutcome = 'Called';
-let recognition = null;
-let isListening = false;
 let sessionLog = [];
 
 /* ══════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
-  // Show redirect hint in setup
   document.getElementById('redirect-hint').textContent =
     'Your redirect URI (for Azure): ' + window.location.href.split('?')[0].split('#')[0];
 
-  // Pre-fill setup fields from saved config
-  document.getElementById('setup-clientid').value  = CFG.clientId;
-  document.getElementById('setup-ves').value        = CFG.vesPipeline;
-  document.getElementById('setup-gyre').value       = CFG.gyrePipeline;
-  document.getElementById('setup-contacts').value   = CFG.contacts;
-  document.getElementById('setup-pipe-sheet').value = CFG.pipeSheet;
-  document.getElementById('setup-cont-sheet').value = CFG.contSheet;
+  // Pre-fill setup
+  document.getElementById('setup-clientid').value     = CFG.clientId;
+  document.getElementById('setup-ves').value          = CFG.vesPipeline;
+  document.getElementById('setup-gyre').value         = CFG.gyrePipeline;
+  document.getElementById('setup-telluno').value      = CFG.tellunoPipeline;
+  document.getElementById('setup-contacts').value     = CFG.contacts;
+  document.getElementById('setup-pipe-sheet').value   = CFG.pipeSheet;
+  document.getElementById('setup-telluno-sheet').value= CFG.tellunoSheet;
+  document.getElementById('setup-cont-sheet').value   = CFG.contSheet;
 
-  // Wire up filter tabs
   document.querySelectorAll('#list-filters .ftab').forEach(t => {
     t.addEventListener('click', () => {
       document.querySelectorAll('#list-filters .ftab').forEach(x => x.classList.remove('active'));
@@ -748,38 +650,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Wire up outcome tabs
   document.querySelectorAll('#outcome-tabs .otab').forEach(t => {
     t.addEventListener('click', () => {
       document.querySelectorAll('#outcome-tabs .otab').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
       currentOutcome = t.dataset.outcome;
-      updateDraftArea();
     });
   });
 
   hideLoading();
-
-  if (!CFG.clientId) {
-    showScreen('setup');
-    return;
-  }
-
+  if (!CFG.clientId) { showScreen('setup'); return; }
   initMsal();
 });
 
-/* ══════════════════════════════════════════════════
-   SETUP
-══════════════════════════════════════════════════ */
 function saveSetup() {
   const cid = document.getElementById('setup-clientid').value.trim();
   if (!cid) { showToast('Paste your Azure Client ID first', true); return; }
-  localStorage.setItem('tc_cid',  cid);
-  localStorage.setItem('tc_ves',  document.getElementById('setup-ves').value.trim());
-  localStorage.setItem('tc_gyre', document.getElementById('setup-gyre').value.trim());
-  localStorage.setItem('tc_cont', document.getElementById('setup-contacts').value.trim());
-  localStorage.setItem('tc_ps',   document.getElementById('setup-pipe-sheet').value.trim() || 'Pipeline');
-  localStorage.setItem('tc_cs',   document.getElementById('setup-cont-sheet').value.trim() || 'Contacts');
+  localStorage.setItem('tc_cid',     cid);
+  localStorage.setItem('tc_ves',     document.getElementById('setup-ves').value.trim());
+  localStorage.setItem('tc_gyre',    document.getElementById('setup-gyre').value.trim());
+  localStorage.setItem('tc_telluno', document.getElementById('setup-telluno').value.trim());
+  localStorage.setItem('tc_cont',    document.getElementById('setup-contacts').value.trim());
+  localStorage.setItem('tc_ps',      document.getElementById('setup-pipe-sheet').value.trim() || 'Pipeline');
+  localStorage.setItem('tc_ts',      document.getElementById('setup-telluno-sheet').value.trim() || 'Telluno Outreach');
+  localStorage.setItem('tc_cs',      document.getElementById('setup-cont-sheet').value.trim() || 'Contacts');
   initMsal();
 }
 
@@ -789,9 +683,7 @@ function saveSetup() {
 async function initMsal() {
   showLoading('Initialising…');
   try {
-    if (typeof msal === 'undefined') {
-      throw new Error('MSAL library not loaded — check internet connection');
-    }
+    if (typeof msal === 'undefined') throw new Error('MSAL library not loaded — check internet connection');
 
     const config = {
       auth: {
@@ -802,25 +694,22 @@ async function initMsal() {
       cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
     };
 
-    // MSAL v3 uses createPublicClientApplication (async), v2 uses constructor
     if (msal.PublicClientApplication.createPublicClientApplication) {
       msalInstance = await msal.PublicClientApplication.createPublicClientApplication(config);
     } else {
       msalInstance = new msal.PublicClientApplication(config);
     }
-
     await msalInstance.initialize?.();
 
-    const response = await msalInstance.handleRedirectPromise().catch(e => { console.warn(e); return null; });
+    const response = await msalInstance.handleRedirectPromise().catch(e => null);
     if (response) currentAccount = response.account;
 
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) {
       currentAccount = currentAccount || accounts[0];
       const name = currentAccount.name || 'You';
-      const initials = name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-      const av = document.getElementById('user-avatar');
-      if (av) av.textContent = initials;
+      document.getElementById('user-avatar').textContent =
+        name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
       hideLoading();
       showScreen('list');
       loadData();
@@ -829,7 +718,6 @@ async function initMsal() {
       showScreen('signin');
     }
   } catch(e) {
-    console.error('MSAL init error:', e);
     hideLoading();
     showToast('Init failed: ' + (e.message || e), true);
     showScreen('setup');
@@ -843,8 +731,8 @@ async function signIn() {
     currentAccount = response.account;
     hideLoading();
     const name = currentAccount.name || 'You';
-    const initials = name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-avatar').textContent =
+      name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
     showScreen('list');
     loadData();
   } catch(e) {
@@ -857,36 +745,12 @@ async function signIn() {
 
 async function getToken() {
   if (!currentAccount) throw new Error('Not signed in');
-  // Clear any stuck interaction state
-  try {
-    const keys = Object.keys(sessionStorage).filter(k => k.includes('interaction') || k.includes('msal'));
-    keys.forEach(k => sessionStorage.removeItem(k));
-  } catch(e) {}
   try {
     const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
     return r.accessToken;
   } catch(e) {
-    // If interaction in progress, wait and retry once
-    if (e.message?.includes('interaction_in_progress')) {
-      await new Promise(r => setTimeout(r, 1500));
-      try {
-        const r2 = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: currentAccount });
-        return r2.accessToken;
-      } catch(e2) {}
-    }
-    try {
-      const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES, account: currentAccount });
-      return r.accessToken;
-    } catch(e2) {
-      if (e2.message?.includes('interaction_in_progress')) {
-        // Clear all MSAL cache and redirect to sign in
-        msalInstance.clearCache?.();
-        currentAccount = null;
-        showScreen('signin');
-        throw new Error('Please sign in again');
-      }
-      throw new Error('Could not get access token: ' + (e2.message || e2));
-    }
+    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES, account: currentAccount });
+    return r.accessToken;
   }
 }
 
@@ -895,44 +759,12 @@ async function getToken() {
 ══════════════════════════════════════════════════ */
 async function graphGet(endpoint) {
   const token = await getToken();
-  const r = await fetch(GRAPH_BASE + endpoint, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const r = await fetch(GRAPH_BASE + endpoint, { headers: { Authorization: `Bearer ${token}` } });
   if (!r.ok) {
     const body = await r.json().catch(() => ({}));
     throw new Error(body.error?.message || `HTTP ${r.status} on ${endpoint}`);
   }
   return r.json();
-}
-
-async function graphPatch(endpoint, body) {
-  const token = await getToken();
-  const r = await fetch(GRAPH_BASE + endpoint, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) {
-    const bd = await r.json().catch(() => ({}));
-    throw new Error(bd.error?.message || `HTTP ${r.status}`);
-  }
-  return r.json();
-}
-
-/* ══════════════════════════════════════════════════
-   EXCEL READ / WRITE
-══════════════════════════════════════════════════ */
-async function colourCell(filePath, sheetName, address, hexColor) {
-  const fp = encodeURIComponent(filePath);
-  const sh = encodeURIComponent(sheetName);
-  const token = await getToken();
-  const r = await fetch(`${GRAPH_BASE}/me/drive/root:/${fp}:/workbook/worksheets/${sh}/range(address='${address}')/format/fill`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ color: hexColor }),
-  });
-  if (!r.ok) console.warn('colourCell failed', r.status);
-  return r;
 }
 
 async function readSheet(filePath, sheetName) {
@@ -945,13 +777,19 @@ async function readSheet(filePath, sheetName) {
 async function writeCell(filePath, sheetName, address, value) {
   const fp = encodeURIComponent(filePath);
   const sh = encodeURIComponent(sheetName);
-  return graphPatch(
-    `/me/drive/root:/${fp}:/workbook/worksheets/${sh}/range(address='${address}')`,
-    { values: [[value]] }
-  );
+  const token = await getToken();
+  const r = await fetch(`${GRAPH_BASE}/me/drive/root:/${fp}:/workbook/worksheets/${sh}/range(address='${address}')`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [[value]] }),
+  });
+  if (!r.ok) {
+    const bd = await r.json().catch(() => ({}));
+    throw new Error(bd.error?.message || `HTTP ${r.status}`);
+  }
+  return r.json();
 }
 
-// Convert 0-based column index to Excel letter (A, B, ... Z, AA, ...)
 function colLetter(idx) {
   let letter = '', n = idx + 1;
   while (n > 0) {
@@ -962,7 +800,6 @@ function colLetter(idx) {
   return letter;
 }
 
-// Build column name → index map from header row
 function buildColMap(headers) {
   const m = {};
   headers.forEach((h, i) => {
@@ -972,81 +809,77 @@ function buildColMap(headers) {
 }
 
 /* ══════════════════════════════════════════════════
-   DATA LOADING
+   DATA LOADING — VES, GYRE, TELLUNO + CONTACTS
 ══════════════════════════════════════════════════ */
 async function loadData() {
-  setSyncStatus('syncing', 'Loading from OneDrive…');
+  setSyncStatus('syncing', 'Loading pipelines from OneDrive…');
 
   try {
-    const [vesRaw, gyreRaw, contRaw] = await Promise.all([
-      readSheet(CFG.vesPipeline,  CFG.pipeSheet),
-      readSheet(CFG.gyrePipeline, CFG.pipeSheet),
-      readSheet(CFG.contacts,     CFG.contSheet),
+    // Read all four files in parallel; tolerate missing contacts file
+    const [vesRaw, gyreRaw, tellunoRaw, contRaw] = await Promise.all([
+      readSheet(CFG.vesPipeline,     CFG.pipeSheet).catch(e => { console.warn('VES read failed', e); return []; }),
+      readSheet(CFG.gyrePipeline,    CFG.pipeSheet).catch(e => { console.warn('Gyre read failed', e); return []; }),
+      readSheet(CFG.tellunoPipeline, CFG.tellunoSheet).catch(e => { console.warn('Telluno read failed', e); return []; }),
+      readSheet(CFG.contacts,        CFG.contSheet).catch(e => { console.warn('Contacts read failed', e); return []; }),
     ]);
 
-    if (!vesRaw.length || !gyreRaw.length) throw new Error('Pipeline sheets appear empty — check sheet names in setup');
+    const vesH     = vesRaw.length     ? buildColMap(vesRaw[0])     : {};
+    const gyreH    = gyreRaw.length    ? buildColMap(gyreRaw[0])    : {};
+    const tellunoH = tellunoRaw.length ? buildColMap(tellunoRaw[0]) : {};
+    const contH    = contRaw.length    ? buildColMap(contRaw[0])    : {};
 
-    const vesH  = buildColMap(vesRaw[0]);
-    const gyreH = buildColMap(gyreRaw[0]);
-    const contH = buildColMap(contRaw[0] || []);
-
-    // Build contacts lookup by name
     const contactLookup = {};
     (contRaw.slice(1) || []).forEach(row => {
       const name = (row[contH['full name']] || '').toString().trim().toLowerCase();
       if (name) contactLookup[name] = row;
     });
 
-    // Parse pipeline rows — updated for VES and Gyre actual column names
-    function parseRows(raw, headers, account, filePath) {
-      const todayIdx = headers[TODAY_COL.toLowerCase()];
-
-      function flex(row, ...keys) {
-        for (const k of keys) {
-          const idx = headers[k.toLowerCase()];
-          if (idx !== undefined) {
-            const v = (row[idx] ?? '').toString().trim();
-            if (v) return v;
-          }
+    // Universal flex parser
+    function flex(row, headers, ...keys) {
+      for (const k of keys) {
+        const idx = headers[k.toLowerCase()];
+        if (idx !== undefined) {
+          const v = (row[idx] ?? '').toString().trim();
+          if (v) return v;
         }
-        for (const k of keys) {
-          const found = Object.keys(headers).find(h => h.includes(k.toLowerCase()));
-          if (found !== undefined) {
-            const v = (row[headers[found]] ?? '').toString().trim();
-            if (v) return v;
-          }
-        }
-        return '';
       }
+      for (const k of keys) {
+        const found = Object.keys(headers).find(h => h.includes(k.toLowerCase()));
+        if (found !== undefined) {
+          const v = (row[headers[found]] ?? '').toString().trim();
+          if (v) return v;
+        }
+      }
+      return '';
+    }
 
+    // Parse VES/Gyre (legacy product-sales schema)
+    function parseProductRows(raw, headers, account, filePath, sheet) {
+      const todayIdx = headers[TODAY_COL.toLowerCase()];
       return raw.slice(1).map((row, i) => {
-        return {
-          account, filePath,
+        const item = {
+          account, filePath, sheet,
           rowIndex: i + 2,
           headers,
-          company:        flex(row, 'brand (end client)', 'brand', 'company', 'account'),
-          contactName:    flex(row, 'current contact(s)', 'contact', 'contact information'),
-          opportunity:    flex(row, 'named opportunity', 'lead product', 'opportunity'),
-          stage:          flex(row, 'oppo status', 'stage', 'status'),
-          value:          flex(row, 'oppo qty', 'som (annual)', 'revenue', 'value (£)', 'value'),
-          nextAction:     flex(row, 'next action'),
-          nextActionDate: flex(row, 'engaged? date?/ often / no', 'next action date'),
-          lastContact:    flex(row, 'last contact', 'feedback/ response to product'),
-          notes:          flex(row, 'notes', 'opportunity background & status. actions [a:], risks/interdependencies [r:]', 'account history'),
+          schema: 'product',
+          company:        flex(row, headers, 'brand (end client)', 'brand', 'company', 'account'),
+          contactName:    flex(row, headers, 'current contact(s)', 'contact', 'contact information'),
+          opportunity:    flex(row, headers, 'named opportunity', 'lead product', 'opportunity'),
+          stage:          flex(row, headers, 'oppo status', 'stage', 'status'),
+          value:          flex(row, headers, 'oppo qty', 'som (annual)', 'revenue', 'value (£)', 'value'),
+          nextAction:     flex(row, headers, 'next action'),
+          nextActionDate: flex(row, headers, 'engaged? date?/ often / no', 'next action date'),
+          lastContact:    flex(row, headers, 'last contact', 'feedback/ response to product'),
+          notes:          flex(row, headers, 'notes', 'opportunity background & status. actions [a:], risks/interdependencies [r:]', 'account history'),
           todayFlag:      todayIdx !== undefined ? (row[todayIdx] ?? '').toString().trim() : '',
           todayColIdx:    todayIdx,
-          // Store write-back column indices using same flex logic on headers
-          notesColIdx:       headers['notes'] !== undefined ? headers['notes'] : undefined,
-          stageColIdx:       headers['oppo status'] !== undefined ? headers['oppo status'] : undefined,
-          nextActionColIdx:  headers['next action'] !== undefined ? headers['next action'] : undefined,
-          lastContactColIdx: headers['last contact'] !== undefined ? headers['last contact'] : undefined,
-          phone:          '',
-          email:          '',
-          linkedin:       '',
-          role:           '',
-          done:           false,
+          notesColIdx:       headers['notes'],
+          stageColIdx:       headers['oppo status'],
+          nextActionColIdx:  headers['next action'],
+          lastContactColIdx: headers['last contact'],
+          phone:'', email:'', linkedin:'', role:'',
+          done:false,
         };
-      }).map(item => {
         const c = contactLookup[item.contactName.toLowerCase()] || [];
         item.phone    = (c[contH['phone']] ?? '').toString().trim();
         item.email    = (c[contH['email']] ?? '').toString().trim();
@@ -1056,38 +889,61 @@ async function loadData() {
       });
     }
 
-    const vesAll  = parseRows(vesRaw,  vesH,  'ves',  CFG.vesPipeline);
-    const gyreAll = parseRows(gyreRaw, gyreH, 'gyre', CFG.gyrePipeline);
+    // Parse Telluno (relationship-CRM schema — v13)
+    function parseTellunoRows(raw, headers, filePath, sheet) {
+      const todayIdx = headers[TODAY_COL.toLowerCase()];
+      return raw.slice(1).map((row, i) => ({
+        account: 'telluno', filePath, sheet,
+        rowIndex: i + 2,
+        headers,
+        schema: 'relationship',
+        company:        flex(row, headers, 'organisation'),
+        contactName:    flex(row, headers, 'full name'),
+        role:           flex(row, headers, 'role'),
+        opportunity:    flex(row, headers, 'organisation type'),
+        stage:          flex(row, headers, 'status'),     // Hot/Warm/Pipeline/Network
+        value:          '',                                // No revenue value in Telluno schema
+        nextAction:     flex(row, headers, 'next action'),
+        nextActionDate: flex(row, headers, 'next action date'),
+        lastContact:    flex(row, headers, 'last contact'),
+        notes:          flex(row, headers, 'notes'),
+        phone:          flex(row, headers, 'mobile'),
+        email:          flex(row, headers, 'email'),
+        linkedin:       flex(row, headers, 'linkedin url'),
+        todayFlag:      todayIdx !== undefined ? (row[todayIdx] ?? '').toString().trim() : '',
+        todayColIdx:    todayIdx,
+        notesColIdx:       headers['notes'],
+        stageColIdx:       headers['status'],
+        nextActionColIdx:  headers['next action'],
+        lastContactColIdx: headers['last contact'],
+        done: false,
+      }));
+    }
+
+    const vesAll     = vesRaw.length     ? parseProductRows(vesRaw,     vesH,     'ves',  CFG.vesPipeline,  CFG.pipeSheet)   : [];
+    const gyreAll    = gyreRaw.length    ? parseProductRows(gyreRaw,    gyreH,    'gyre', CFG.gyrePipeline, CFG.pipeSheet)   : [];
+    const tellunoAll = tellunoRaw.length ? parseTellunoRows(tellunoRaw, tellunoH,         CFG.tellunoPipeline, CFG.tellunoSheet) : [];
 
     const VALID_TODAY = new Set(['y', 'yes', 'true', '1', '✓', 'x']);
-    const todayList = [...vesAll, ...gyreAll].filter(c =>
+    const todayList = [...vesAll, ...gyreAll, ...tellunoAll].filter(c =>
       VALID_TODAY.has(c.todayFlag.toLowerCase())
     );
 
-    appData = { today: todayList, vesAll, gyreAll, contacts: contactLookup, vesHeaders: vesH, gyreHeaders: gyreH, contHeaders: contH };
+    appData = { today: todayList, vesAll, gyreAll, tellunoAll, contacts: contactLookup };
 
     setSyncStatus('live', `Synced · ${todayList.length} contact${todayList.length !== 1 ? 's' : ''} today`);
     renderDateStrip();
     renderList('all');
     renderPipeline();
     renderKPI();
-
   } catch(err) {
     setSyncStatus('error', 'Sync error — tap Refresh');
-    const msg = err.message || '';
-    if (msg.includes('interaction_in_progress') || msg.includes('sign in')) {
-      showToast('Session expired — tap Refresh to sign in again', true);
-      setTimeout(() => { currentAccount = null; showScreen('signin'); }, 2000);
-    } else {
-      showToast('Load error: ' + msg, true);
-    }
+    showToast('Load error: ' + err.message, true);
     console.error(err);
   }
 }
 
-async function refreshData() {
-  await loadData();
-}
+async function refreshData() { await loadData(); }
 
 /* ══════════════════════════════════════════════════
    RENDER — LIST
@@ -1118,15 +974,17 @@ function renderList(filter = 'all') {
   document.getElementById('list-count').textContent =
     doneCount > 0 ? `${doneCount}/${total} done` : `${total} today`;
   document.getElementById('list-date-small').textContent =
-    total === 0 ? 'Add Y in TODAY column in your pipeline' :
+    total === 0 ? 'Add Y in TODAY column of any pipeline file' :
     `${total - doneCount} remaining · ${total} selected`;
 
   const filtered = list.filter(c => {
-    if (filter === 'all')   return true;
-    if (filter === 'ves')   return c.account === 'ves';
-    if (filter === 'gyre')  return c.account === 'gyre';
-    if (filter === 'call')  return !!c.phone;
-    if (filter === 'email') return !!c.email;
+    if (filter === 'all')     return true;
+    if (filter === 'ves')     return c.account === 'ves';
+    if (filter === 'gyre')    return c.account === 'gyre';
+    if (filter === 'telluno') return c.account === 'telluno';
+    if (filter === 'call')    return !!c.phone;
+    if (filter === 'email')   return !!c.email;
+    if (filter === 'li')      return !!c.linkedin;
     return true;
   });
 
@@ -1136,16 +994,14 @@ function renderList(filter = 'all') {
     body.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
       <div class="empty-state-title">Nothing here</div>
-      <div class="empty-state-sub">Open your pipeline in Excel and type <strong>Y</strong> in the TODAY column for contacts you want to work on today.</div>
+      <div class="empty-state-sub">Open any pipeline file in Excel and type <strong>Y</strong> in the TODAY column for contacts you want to work on today.</div>
     </div>`;
     return;
   }
 
-  // Sort: not-done priority (overdue first), then done
   const sorted = [...filtered].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
-    const aOver = isOverdue(a.nextActionDate);
-    const bOver = isOverdue(b.nextActionDate);
+    const aOver = isOverdue(a.nextActionDate), bOver = isOverdue(b.nextActionDate);
     if (aOver !== bOver) return aOver ? -1 : 1;
     return 0;
   });
@@ -1161,8 +1017,9 @@ function isOverdue(dateStr) {
 
 function priorityClass(c) {
   if (isOverdue(c.nextActionDate)) return 'hot';
-  const stage = c.stage.toLowerCase();
-  if (['proposal','negotiation','study sent'].includes(stage)) return 'warm';
+  const stage = (c.stage || '').toLowerCase();
+  if (['proposal','negotiation','study sent','hot'].includes(stage)) return 'hot';
+  if (['qualified','warm','warm-tier'].includes(stage)) return 'warm';
   return 'cool';
 }
 
@@ -1174,10 +1031,8 @@ function cardHTML(c, idx) {
   ].filter(Boolean).join('');
 
   const overdue = isOverdue(c.nextActionDate);
-  const badgeExtra = overdue ? ' overdue' : '';
-
   return `<div class="card ${c.account}${c.done ? ' completed' : ''}${overdue && !c.done ? ' overdue' : ''}"
-    onclick="openDetail(${idx})" data-account="${c.account}" data-done="${c.done}">
+    onclick="openDetail(${idx})">
     <div class="card-accent"></div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
       <div style="flex:1;">
@@ -1185,7 +1040,7 @@ function cardHTML(c, idx) {
           <div class="dot ${priorityClass(c)}"></div>
           <div class="card-name">${esc(c.company)}</div>
         </div>
-        <div class="card-sub">${c.contactName ? esc(c.contactName) + ' · ' : ''}${esc(c.opportunity || '')}</div>
+        <div class="card-sub">${c.contactName ? esc(c.contactName) + ' · ' : ''}${esc(c.opportunity || c.role || '')}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
         <div class="badge ${c.account}">${c.account.toUpperCase()}</div>
@@ -1205,14 +1060,15 @@ function cardHTML(c, idx) {
    DETAIL VIEW
 ══════════════════════════════════════════════════ */
 function openDetail(listIdx) {
-  // Find the index in the full today array matching what was rendered
   const filter = document.querySelector('#list-filters .ftab.active')?.dataset.filter || 'all';
   const filtered = appData.today.filter(c => {
-    if (filter === 'all')   return true;
-    if (filter === 'ves')   return c.account === 'ves';
-    if (filter === 'gyre')  return c.account === 'gyre';
-    if (filter === 'call')  return !!c.phone;
-    if (filter === 'email') return !!c.email;
+    if (filter === 'all')     return true;
+    if (filter === 'ves')     return c.account === 'ves';
+    if (filter === 'gyre')    return c.account === 'gyre';
+    if (filter === 'telluno') return c.account === 'telluno';
+    if (filter === 'call')    return !!c.phone;
+    if (filter === 'email')   return !!c.email;
+    if (filter === 'li')      return !!c.linkedin;
     return true;
   }).sort((a,b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -1225,44 +1081,39 @@ function openDetail(listIdx) {
   if (!currentContact) return;
   const c = currentContact;
 
-  document.getElementById('d-badge').textContent   = c.account.toUpperCase();
-  document.getElementById('d-badge').className     = `badge ${c.account}`;
-  // Brand as main heading, contact name below
-  document.getElementById('d-name').textContent    = c.company;
-  document.getElementById('d-role').textContent    = c.contactName || c.opportunity || '—';
+  document.getElementById('d-badge').textContent = c.account.toUpperCase();
+  document.getElementById('d-badge').className   = `badge ${c.account}`;
+  document.getElementById('d-name').textContent  = c.company;
+  document.getElementById('d-role').textContent  = c.contactName ? `${c.contactName}${c.role ? ' · ' + c.role : ''}` : (c.opportunity || c.role || '—');
   document.getElementById('d-company').textContent = c.opportunity || '—';
 
-  // Stage pill
   const stagePill = document.getElementById('d-stage');
   stagePill.textContent = c.stage || '—';
   stagePill.className   = 'stage-pill ' + stageClass(c.stage);
 
+  // For Telluno (relationship schema), hide the £ value row
+  document.getElementById('d-value-row').style.display = (c.schema === 'relationship') ? 'none' : '';
   document.getElementById('d-value').textContent       = c.value ? '£' + c.value : '—';
-  document.getElementById('d-next-action').textContent  = c.nextAction || '—';
-  document.getElementById('d-last').textContent         = fmtDate(c.lastContact);
-  document.getElementById('d-oppo').textContent         = c.opportunity || '—';
+
+  document.getElementById('d-next-action').textContent = c.nextAction || '—';
+  document.getElementById('d-last').textContent        = fmtDate(c.lastContact);
+  document.getElementById('d-oppo').textContent        = c.opportunity || '—';
 
   if (c.notes) {
-    document.getElementById('d-note').textContent     = c.notes;
+    document.getElementById('d-note').textContent = c.notes;
     document.getElementById('d-note-wrap').style.display = '';
   } else {
     document.getElementById('d-note-wrap').style.display = 'none';
   }
 
-  // Pre-select stage selector
   document.getElementById('stage-select').value = '';
   document.getElementById('na-input').value = '';
   document.getElementById('log-ta').value = '';
-  document.getElementById('draft-area').classList.remove('show');
-
-  // Reset outcome tabs
   document.querySelectorAll('#outcome-tabs .otab').forEach((t,i) => t.classList.toggle('active', i===0));
   currentOutcome = 'Called';
 
-  // Action buttons
   const actionsEl = document.getElementById('d-actions');
   actionsEl.innerHTML = '';
-
   if (c.phone) {
     const b = document.createElement('button');
     b.className = 'act-btn phone';
@@ -1280,7 +1131,7 @@ function openDetail(listIdx) {
   if (c.linkedin) {
     const b = document.createElement('button');
     b.className = 'act-btn li';
-    b.innerHTML = `${liIcon()} LI`;
+    b.innerHTML = `${liIcon()} LinkedIn`;
     b.onclick = () => window.open(c.linkedin, '_blank');
     actionsEl.appendChild(b);
   }
@@ -1290,6 +1141,10 @@ function openDetail(listIdx) {
 
 function stageClass(stage) {
   const s = (stage || '').toLowerCase();
+  if (s === 'hot')               return 'hot';
+  if (s === 'warm')              return 'warm-tier';
+  if (s === 'network')           return 'network';
+  if (s === 'pipeline')          return 'pipeline';
   if (s.includes('prospect'))    return 'prospect';
   if (s.includes('qualified'))   return 'qualified';
   if (s.includes('study'))       return 'study';
@@ -1300,126 +1155,7 @@ function stageClass(stage) {
 }
 
 /* ══════════════════════════════════════════════════
-   VOICE INPUT
-══════════════════════════════════════════════════ */
-function toggleVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    const ta = document.getElementById('log-ta');
-    ta.focus();
-    showToast('Tap the mic on your iPhone keyboard to speak');
-    return;
-  }
-
-  if (isListening) {
-    recognition?.stop();
-    return;
-  }
-
-  recognition = new SR();
-  recognition.lang = 'en-GB';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    isListening = true;
-    const btn = document.getElementById('voice-btn');
-    btn.classList.add('listening');
-    btn.innerHTML = `${micIcon()} Listening…`;
-  };
-
-  recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
-    const ta = document.getElementById('log-ta');
-    ta.value = ta.value ? ta.value + ' ' + transcript : transcript;
-  };
-
-  recognition.onend = () => {
-    isListening = false;
-    const btn = document.getElementById('voice-btn');
-    btn.classList.remove('listening');
-    btn.innerHTML = `${micIcon()} Tap to Speak`;
-  };
-
-  recognition.onerror = (e) => {
-    isListening = false;
-    document.getElementById('voice-btn').classList.remove('listening');
-    document.getElementById('voice-btn').innerHTML = `${micIcon()} Tap to Speak`;
-    if (e.error !== 'no-speech') showToast('Voice error — try typing instead', true);
-  };
-
-  recognition.start();
-}
-
-/* ══════════════════════════════════════════════════
-   DRAFT MESSAGE GENERATION
-══════════════════════════════════════════════════ */
-function updateDraftArea() {
-  const showDraft = ['Emailed', 'LinkedIn', 'WhatsApp'].includes(currentOutcome);
-  const draftEl = document.getElementById('draft-area');
-
-  if (!showDraft || !currentContact) {
-    draftEl.classList.remove('show');
-    return;
-  }
-
-  const c = currentContact;
-  const firstName = c.contactName.split(' ')[0];
-  const isVES = c.account === 'ves';
-  let draft = '';
-
-  if (currentOutcome === 'Emailed') {
-    draft = `Hi ${firstName},\n\n` +
-      (isVES
-        ? `I wanted to follow up on AirDoor — we recently won two CIBSE awards for our entrance air barrier technology and I thought it relevant given ${c.company}'s work.\n\nThe system delivers ~95% energy savings versus overhead air curtains and features in both the Sainsbury's and Waitrose net zero sustainability reports. Happy to arrange a brief walkthrough or send our case study pack.`
-        : `I wanted to follow up on Gyre Energy's cold storage optimisation platform. Our Market Harborough trial demonstrated 36% kWh savings on a 3,000 sq ft freezer using AI-driven thermal energy storage — developed with the University of Oxford.\n\nGiven ${c.company}'s operations, I think there's a compelling case. Happy to arrange a 20-minute call.`) +
-      `\n\nBest regards,\nJohn O'Brien\nTelluno Consulting`;
-
-    document.getElementById('draft-label').textContent = 'Draft Email';
-    document.getElementById('draft-open-btn').textContent = 'Open Mail';
-  } else if (currentOutcome === 'LinkedIn') {
-    draft = `Hi ${firstName} — great to be connected. ` +
-      (isVES
-        ? `VES AirDoor won 2 CIBSE awards this year — invisible entrance air barrier, ~95% energy savings vs air curtains. Happy to share the case study or arrange a quick call if it's relevant for ${c.company}.`
-        : `Following Gyre Energy's Market Harborough trial — 36% kWh savings in cold storage using AI and thermal storage. Happy to share the case study if it's relevant for ${c.company}.`) +
-      ` John`;
-    document.getElementById('draft-label').textContent = 'Draft LinkedIn Message';
-    document.getElementById('draft-open-btn').textContent = 'Open LinkedIn';
-  } else if (currentOutcome === 'WhatsApp') {
-    draft = `Hi ${firstName}, John O'Brien here from Telluno. ` +
-      (isVES
-        ? `Quick follow-up on AirDoor — happy to send our CIBSE award case study or arrange a call at your convenience.`
-        : `Quick follow-up on Gyre Energy — happy to send the Market Harborough case study (36% kWh savings in cold storage) or arrange a call.`);
-    document.getElementById('draft-label').textContent = 'Draft WhatsApp';
-    document.getElementById('draft-open-btn').textContent = 'Open WhatsApp';
-  }
-
-  document.getElementById('draft-text').textContent = draft;
-  draftEl.classList.add('show');
-}
-
-function copyDraft() {
-  const text = document.getElementById('draft-text').textContent;
-  navigator.clipboard?.writeText(text).then(() => showToast('Copied to clipboard'));
-}
-
-function openDraftTarget() {
-  const c = currentContact;
-  if (currentOutcome === 'Emailed' && c.email) {
-    const body = encodeURIComponent(document.getElementById('draft-text').textContent);
-    window.location.href = `mailto:${c.email}?body=${body}`;
-  } else if (currentOutcome === 'LinkedIn' && c.linkedin) {
-    window.open(c.linkedin, '_blank');
-  } else if (currentOutcome === 'WhatsApp' && c.phone) {
-    const text = encodeURIComponent(document.getElementById('draft-text').textContent);
-    window.open(`https://wa.me/${c.phone.replace(/\D/g,'')}?text=${text}`, '_blank');
-  } else {
-    showToast('No contact info available for this channel', true);
-  }
-}
-
-/* ══════════════════════════════════════════════════
-   SAVE OUTCOME → EXCEL
+   SAVE OUTCOME — works for both schemas
 ══════════════════════════════════════════════════ */
 function handleStageChange(el) {
   if (el.value === 'FLAG_REVIEW') {
@@ -1427,9 +1163,7 @@ function handleStageChange(el) {
     el.style.borderColor = 'rgba(232,194,58,0.5)';
     el.style.background = 'rgba(232,194,58,0.08)';
   } else {
-    el.style.color = '';
-    el.style.borderColor = '';
-    el.style.background = '';
+    el.style.color = ''; el.style.borderColor = ''; el.style.background = '';
   }
 }
 
@@ -1456,59 +1190,36 @@ async function saveOutcome() {
     const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
     const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
     const logStamp = `[${dateStr} ${timeStr} · ${currentOutcome}] ${notes}`;
-    const updatedNotes = c.notes
-      ? `${logStamp}\n${c.notes}`
-      : logStamp;
+    const updatedNotes = c.notes ? `${logStamp}\n${c.notes}` : logStamp;
 
-    const h    = c.headers;
-    const row  = c.rowIndex;
-    const file = c.filePath;
-    const sh   = CFG.pipeSheet;
-
+    const file  = c.filePath;
+    const sheet = c.sheet;
+    const row   = c.rowIndex;
     const writes = [];
 
-    // Notes — use stored index
     if (c.notesColIdx !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(c.notesColIdx)}${row}`, updatedNotes));
-
-    // Last Contact → today
+      writes.push(writeCell(file, sheet, `${colLetter(c.notesColIdx)}${row}`, updatedNotes));
     if (c.lastContactColIdx !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(c.lastContactColIdx)}${row}`, dateStr));
-
-    // Stage change
-    if (newStage && newStage !== c.stage && c.stageColIdx !== undefined) {
-      const stageValue = newStage === 'FLAG_REVIEW' ? c.stage : newStage;
-      writes.push(writeCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, stageValue));
-      // If flagged for review, colour the stage cell orange
-      if (newStage === 'FLAG_REVIEW') {
-        writes.push(colourCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, 'FF8C00'));
-      }
-    } else if (newStage === 'FLAG_REVIEW' && c.stageColIdx !== undefined) {
-      // Stage unchanged but flag selected — just colour the cell
-      writes.push(colourCell(file, sh, `${colLetter(c.stageColIdx)}${row}`, 'FF8C00'));
-    }
-
-    // Next action update
+      writes.push(writeCell(file, sheet, `${colLetter(c.lastContactColIdx)}${row}`, dateStr));
+    if (newStage && newStage !== 'FLAG_REVIEW' && newStage !== c.stage && c.stageColIdx !== undefined)
+      writes.push(writeCell(file, sheet, `${colLetter(c.stageColIdx)}${row}`, newStage));
     if (newNA && c.nextActionColIdx !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(c.nextActionColIdx)}${row}`, newNA));
-
-    // TODAY → Done
+      writes.push(writeCell(file, sheet, `${colLetter(c.nextActionColIdx)}${row}`, newNA));
     if (c.todayColIdx !== undefined)
-      writes.push(writeCell(file, sh, `${colLetter(c.todayColIdx)}${row}`, 'Done'));
+      writes.push(writeCell(file, sheet, `${colLetter(c.todayColIdx)}${row}`, 'Done'));
 
     await Promise.all(writes);
 
-    // Update in-memory data
     c.notes = updatedNotes;
     c.lastContact = dateStr;
-    if (newStage) c.stage = newStage;
-    if (newNA)    c.nextAction = newNA;
+    if (newStage && newStage !== 'FLAG_REVIEW') c.stage = newStage;
+    if (newNA) c.nextAction = newNA;
     c.done = true;
 
-    // Add to session log
     sessionLog.unshift({
-      name: c.contactName, company: c.company, account: c.account,
-      outcome: currentOutcome, notes, time: `${timeStr}`, date: dateStr,
+      name: c.contactName || c.company,
+      company: c.company, account: c.account,
+      outcome: currentOutcome, notes, time: timeStr, date: dateStr,
       stage: newStage || c.stage,
     });
     renderActivityLog();
@@ -1517,13 +1228,9 @@ async function saveOutcome() {
     document.getElementById('log-ta').value = '';
     document.getElementById('stage-select').value = '';
     document.getElementById('na-input').value = '';
-    document.getElementById('draft-area').classList.remove('show');
 
-    // Re-render list
     renderList(document.querySelector('#list-filters .ftab.active')?.dataset.filter || 'all');
-
     setTimeout(() => showScreen('list'), 700);
-
   } catch(err) {
     showToast('Save failed: ' + err.message, true);
     console.error(err);
@@ -1534,29 +1241,25 @@ async function saveOutcome() {
 }
 
 /* ══════════════════════════════════════════════════
-   RENDER — PIPELINE
+   RENDER — PIPELINE (overview)
 ══════════════════════════════════════════════════ */
 function renderPipeline() {
-  const all = [...appData.vesAll, ...appData.gyreAll];
+  const all = [...appData.vesAll, ...appData.gyreAll, ...appData.tellunoAll];
   const today = new Date();
 
   const overdue = all.filter(c => {
     if (!c.nextActionDate) return false;
     const d = new Date(c.nextActionDate);
-    return !isNaN(d) && d < today && c.stage !== 'Won' && c.stage !== 'Lost';
+    return !isNaN(d) && d < today && !['Won','Lost'].includes(c.stage);
   });
 
-  const highValue = all
-    .filter(c => !overdue.includes(c) && c.stage !== 'Won' && c.stage !== 'Lost')
-    .filter(c => {
-      const v = parseFloat((c.value || '0').replace(/[^0-9.]/g,''));
-      return v > 5000;
-    })
-    .sort((a,b) => {
-      const va = parseFloat((a.value||'0').replace(/[^0-9.]/g,'')),
-            vb = parseFloat((b.value||'0').replace(/[^0-9.]/g,''));
-      return vb - va;
-    })
+  const tellunoHot = appData.tellunoAll.filter(c => (c.stage || '').toLowerCase() === 'hot').slice(0, 12);
+  const tellunoWarm = appData.tellunoAll.filter(c => (c.stage || '').toLowerCase() === 'warm').slice(0, 8);
+
+  const highValue = [...appData.vesAll, ...appData.gyreAll]
+    .filter(c => !overdue.includes(c) && !['Won','Lost'].includes(c.stage))
+    .filter(c => parseFloat((c.value || '0').replace(/[^0-9.]/g,'')) > 5000)
+    .sort((a,b) => parseFloat((b.value||'0').replace(/[^0-9.]/g,'')) - parseFloat((a.value||'0').replace(/[^0-9.]/g,'')))
     .slice(0, 10);
 
   let html = '';
@@ -1567,11 +1270,21 @@ function renderPipeline() {
   }
 
   if (highValue.length) {
-    html += `<div class="sect">High Value · Active</div>`;
+    html += `<div class="sect">VES + Gyre — High Value Active</div>`;
     html += highValue.map(c => miniCardHTML(c, false)).join('');
   }
 
-  if (!overdue.length && !highValue.length) {
+  if (tellunoHot.length) {
+    html += `<div class="sect">Telluno — Hot Tier (${tellunoHot.length})</div>`;
+    html += tellunoHot.map(c => miniCardHTML(c, false)).join('');
+  }
+
+  if (tellunoWarm.length) {
+    html += `<div class="sect">Telluno — Warm Tier (${tellunoWarm.length})</div>`;
+    html += tellunoWarm.map(c => miniCardHTML(c, false)).join('');
+  }
+
+  if (!html) {
     html = `<div class="empty-state">
       <div class="empty-state-title">Pipeline loaded</div>
       <div class="empty-state-sub">No overdue actions. All looking good.</div>
@@ -1582,15 +1295,12 @@ function renderPipeline() {
 }
 
 function miniCardHTML(c, overdue) {
-  const idx = appData.today.findIndex(x => x === c);
-  const clickable = idx >= 0 ? `onclick="openDetailDirect(appData.vesAll.concat(appData.gyreAll).indexOf(arguments[0]?.currentTarget?.dataset?.ref === '${c.contactName}' ? c : null))"` : '';
-
   return `<div class="card ${c.account}${overdue ? ' overdue' : ''}">
     <div class="card-accent"></div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
       <div>
-        <div class="card-name">${esc(c.contactName)}</div>
-        <div class="card-sub">${esc(c.company)}</div>
+        <div class="card-name">${esc(c.contactName || c.company)}</div>
+        <div class="card-sub">${esc(c.contactName ? c.company : (c.opportunity || c.role || ''))}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
         <div class="badge ${c.account}">${c.account.toUpperCase()}</div>
@@ -1598,7 +1308,7 @@ function miniCardHTML(c, overdue) {
       </div>
     </div>
     <div class="card-note">
-      ${c.value ? `<strong>£${esc(c.value)}</strong> · ` : ''}${esc(c.nextAction || c.notes?.slice(0,80) || '—')}
+      ${c.value ? `<strong>£${esc(c.value)}</strong> · ` : ''}${esc(c.nextAction || (c.notes ? c.notes.slice(0,80) : '—'))}
       ${overdue && c.nextActionDate ? ` · Due ${esc(c.nextActionDate)}` : ''}
     </div>
   </div>`;
@@ -1610,29 +1320,33 @@ function miniCardHTML(c, overdue) {
 function renderKPI() {
   const vesAll  = appData.vesAll;
   const gyreAll = appData.gyreAll;
-  const all     = [...vesAll, ...gyreAll];
+  const tellunoAll = appData.tellunoAll;
+  const productAll = [...vesAll, ...gyreAll];
 
-  // Stage counts
   const stages = ['Prospect','Qualified','Study Sent','Proposal','Negotiation','Won'];
   const vesCounts  = stageCounts(vesAll,  stages);
   const gyreCounts = stageCounts(gyreAll, stages);
 
-  // Pipeline values
+  const tellunoStages = ['Hot','Warm','Pipeline','Network'];
+  const tellunoCounts = stageCounts(tellunoAll, tellunoStages);
+
   const vesValue  = totalValue(vesAll.filter(c => !['Won','Lost'].includes(c.stage)));
   const gyreValue = totalValue(gyreAll.filter(c => !['Won','Lost'].includes(c.stage)));
-  const wonValue  = totalValue(all.filter(c => c.stage === 'Won'));
+  const wonValue  = totalValue(productAll.filter(c => c.stage === 'Won'));
 
-  // Today's cadence progress
   const todayDone = appData.today.filter(c => c.done).length;
   const todayTotal = appData.today.length;
 
   const maxVes  = Math.max(...Object.values(vesCounts),  1);
   const maxGyre = Math.max(...Object.values(gyreCounts), 1);
+  const maxTel  = Math.max(...Object.values(tellunoCounts), 1);
 
   const stageColors = {
     'Prospect':'var(--muted)', 'Qualified':'var(--blue)',
     'Study Sent':'var(--amber)', 'Proposal':'var(--accent)',
-    'Negotiation':'#b87aff', 'Won':'var(--green)'
+    'Negotiation':'#b87aff', 'Won':'var(--green)',
+    'Hot':'var(--accent)', 'Warm':'var(--amber)',
+    'Pipeline':'var(--muted)', 'Network':'#b87aff',
   };
 
   let html = `
@@ -1648,9 +1362,9 @@ function renderKPI() {
       <div class="kpi-delta">${gyreAll.filter(c=>!['Won','Lost'].includes(c.stage)).length} active deals</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Won This Year</div>
-      <div class="kpi-val" style="color:var(--green)">£${fmtK(wonValue)}</div>
-      <div class="kpi-delta">${all.filter(c=>c.stage==='Won').length} deals closed</div>
+      <div class="kpi-label">Telluno Targets</div>
+      <div class="kpi-val" style="color:var(--telluno)">${tellunoAll.length}</div>
+      <div class="kpi-delta">${tellunoCounts['Hot'] || 0} Hot · ${tellunoCounts['Warm'] || 0} Warm</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Today's Cadence</div>
@@ -1680,12 +1394,21 @@ function renderKPI() {
   </div>
 
   <div class="stat-card">
+    <div class="stat-card-title">Telluno — Targets by Status</div>
+    ${tellunoStages.map(s => `<div class="pipe-bar-row">
+      <div class="pipe-bar-label">${s}</div>
+      <div class="pipe-bar-track"><div class="pipe-bar-fill" style="width:${Math.round(tellunoCounts[s]/maxTel*100)}%;background:${stageColors[s]}"></div></div>
+      <div class="pipe-bar-count">${tellunoCounts[s]}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="stat-card">
     <div class="stat-card-title">Conversion Benchmarks</div>
     <div class="stat-row"><div class="stat-key">Prospect → Qualified target</div><div class="stat-val">20–30%</div></div>
     <div class="stat-row"><div class="stat-key">Qualified → Study/Proposal</div><div class="stat-val">40–60%</div></div>
     <div class="stat-row"><div class="stat-key">Proposal → Won target</div><div class="stat-val">25–35%</div></div>
-    <div class="stat-row"><div class="stat-key">Sales cycle (typical)</div><div class="stat-val">3–9 months</div></div>
-    <div class="stat-row"><div class="stat-key">New oppos/week (target)</div><div class="stat-val">1–2</div></div>
+    <div class="stat-row"><div class="stat-key">Telluno LinkedIn reply rate</div><div class="stat-val">~36%</div></div>
+    <div class="stat-row"><div class="stat-key">Telluno target: clients/quarter</div><div class="stat-val">1–2</div></div>
   </div>`;
 
   document.getElementById('kpi-body').innerHTML = html;
@@ -1722,7 +1445,7 @@ function renderActivityLog() {
     body.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       <div class="empty-state-title">No activity yet</div>
-      <div class="empty-state-sub">Outcomes you log today will appear here and are saved to your Excel pipeline in real time.</div>
+      <div class="empty-state-sub">Outcomes you log today will appear here and are saved to your Excel pipelines in real time.</div>
     </div>`;
     return;
   }
@@ -1749,7 +1472,7 @@ function renderActivityLog() {
 }
 
 /* ══════════════════════════════════════════════════
-   NAVIGATION
+   NAVIGATION & UI
 ══════════════════════════════════════════════════ */
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1760,16 +1483,12 @@ function showScreen(id) {
 
 function gotoTab(id) {
   showScreen(id);
-  // Update nav active states
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick')?.includes(`'${id}'`)) n.classList.add('active');
   });
 }
 
-/* ══════════════════════════════════════════════════
-   UI HELPERS
-══════════════════════════════════════════════════ */
 function setSyncStatus(state, label) {
   const dot = document.getElementById('sync-dot');
   dot.className = 'sync-dot ' + (state === 'syncing' ? 'syncing' : state === 'error' ? 'error' : '');
@@ -1780,10 +1499,7 @@ function showLoading(text) {
   document.getElementById('loading-text').textContent = text || 'Loading…';
   document.getElementById('loading').classList.remove('hidden');
 }
-
-function hideLoading() {
-  document.getElementById('loading').classList.add('hidden');
-}
+function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
 
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
@@ -1803,7 +1519,6 @@ function esc(str) {
 function fmtDate(val) {
   if (!val) return '—';
   const s = val.toString().trim();
-  // Excel serial number (pure digits, 4-6 chars)
   if (/^\d{4,6}$/.test(s)) {
     const d = new Date((parseInt(s) - 25569) * 86400 * 1000);
     if (!isNaN(d)) return d.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
@@ -1811,160 +1526,9 @@ function fmtDate(val) {
   return s || '—';
 }
 
-// SVG icons
-function phoneIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 .91h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>`; }
+function phoneIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 010 4.18 2 2 0 012 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>`; }
 function emailIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`; }
 function liIcon(){ return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>`; }
-function micIcon(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`; }
-
-
-/* ══════════════════════════════════════════════════
-   NEW LEAD
-══════════════════════════════════════════════════ */
-let nlAccount = 'gyre'; // default
-let nlAddToday = false;
-
-function selectNLAccount(acc) {
-  nlAccount = acc;
-  const vesBtn  = document.getElementById('nl-ves-btn');
-  const gyreBtn = document.getElementById('nl-gyre-btn');
-  if (acc === 'ves') {
-    vesBtn.style.background  = 'rgba(232,97,58,.15)';
-    vesBtn.style.borderColor = 'var(--ves)';
-    vesBtn.style.color       = 'var(--ves)';
-    gyreBtn.style.background = 'var(--surface)';
-    gyreBtn.style.borderColor= 'var(--border)';
-    gyreBtn.style.color      = 'var(--muted)';
-  } else {
-    gyreBtn.style.background  = 'rgba(58,143,232,.15)';
-    gyreBtn.style.borderColor = 'var(--gyre)';
-    gyreBtn.style.color       = 'var(--gyre)';
-    vesBtn.style.background  = 'var(--surface)';
-    vesBtn.style.borderColor = 'var(--border)';
-    vesBtn.style.color       = 'var(--muted)';
-  }
-}
-
-function selectNLToday(addIt) {
-  nlAddToday = addIt;
-  const yesBtn = document.getElementById('nl-today-yes');
-  const noBtn  = document.getElementById('nl-today-no');
-  if (addIt) {
-    yesBtn.style.background  = 'rgba(58,232,160,.12)';
-    yesBtn.style.borderColor = 'rgba(58,232,160,.3)';
-    yesBtn.style.color       = 'var(--green)';
-    noBtn.style.background   = 'var(--surface)';
-    noBtn.style.borderColor  = 'var(--border)';
-    noBtn.style.color        = 'var(--muted)';
-  } else {
-    noBtn.style.background   = 'rgba(58,232,160,.08)';
-    noBtn.style.borderColor  = 'rgba(58,232,160,.3)';
-    noBtn.style.color        = 'var(--green)';
-    yesBtn.style.background  = 'var(--surface)';
-    yesBtn.style.borderColor = 'var(--border)';
-    yesBtn.style.color       = 'var(--muted)';
-  }
-}
-
-async function saveNewLead() {
-  const company   = document.getElementById('nl-company').value.trim();
-  const contact   = document.getElementById('nl-contact').value.trim();
-  const oppo      = document.getElementById('nl-opportunity').value.trim();
-  const stage     = document.getElementById('nl-stage').value;
-  const notes     = document.getElementById('nl-notes').value.trim();
-  const nextAction= document.getElementById('nl-next-action').value.trim();
-
-  if (!company) {
-    document.getElementById('nl-company').focus();
-    showToast('Company name is required', true);
-    return;
-  }
-
-  const btn = document.getElementById('nl-save-btn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-
-  try {
-    const filePath = nlAccount === 'ves' ? CFG.vesPipeline : CFG.gyrePipeline;
-    const sh = CFG.pipeSheet;
-    const fp = encodeURIComponent(filePath);
-    const shE = encodeURIComponent(sh);
-
-    // Get used range to find next empty row
-    const rangeData = await graphGet(`/me/drive/root:/${fp}:/workbook/worksheets/${shE}/usedRange`);
-    const nextRow = (rangeData.rowCount || 1) + 1;
-
-    // Build row values matching column structure:
-    // A=Brand, F=Oppo Status, L=Named Opportunity, M=Notes, N=Next Action, O=TODAY, P=Current Contact(s)
-    const token = await getToken();
-    const now   = new Date();
-    const dateStr = now.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
-    const noteStamp = notes ? `[${dateStr} · New Lead] ${notes}` : '';
-
-    // Write each field to its column
-    const writes = [];
-    const colMap = { 'A':0,'F':5,'L':11,'M':12,'N':13,'O':14,'P':15 };
-
-    const fields = [
-      ['A', company],
-      ['F', stage],
-      ['L', oppo],
-      ['M', noteStamp],
-      ['N', nextAction],
-      ['O', nlAddToday ? 'Y' : ''],
-      ['P', contact],
-    ];
-
-    for (const [col, val] of fields) {
-      if (val) {
-        writes.push(writeCell(filePath, sh, `${col}${nextRow}`, val));
-      }
-    }
-
-    await Promise.all(writes);
-
-    // Log to session log
-    sessionLog.unshift({
-      name: contact || company, company,
-      account: nlAccount, outcome: 'New Lead',
-      notes: `${oppo ? oppo + ' · ' : ''}${notes || 'Added to pipeline'}`,
-      time: now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
-      date: dateStr, stage,
-    });
-    renderActivityLog();
-
-    showToast(`✓ ${company} added to ${nlAccount.toUpperCase()} pipeline`);
-
-    // Reset form
-    document.getElementById('nl-company').value    = '';
-    document.getElementById('nl-contact').value    = '';
-    document.getElementById('nl-opportunity').value= '';
-    document.getElementById('nl-notes').value      = '';
-    document.getElementById('nl-next-action').value= '';
-    document.getElementById('nl-stage').value      = 'Prospect Identified';
-    nlAddToday = false;
-    selectNLToday(false);
-    selectNLAccount('gyre');
-
-    // Reload data so new lead appears
-    await refreshData();
-    setTimeout(() => showScreen('list'), 600);
-
-  } catch(err) {
-    showToast('Save failed: ' + err.message, true);
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Add to Pipeline ↗';
-  }
-}
-
-// Init new lead form when opened via + button
-function openNewLead() {
-  selectNLAccount('gyre');
-  selectNLToday(false);
-  showScreen('new-lead');
-}
 </script>
 </body>
 </html>
