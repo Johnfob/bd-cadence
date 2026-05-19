@@ -280,6 +280,12 @@ a{color:inherit;text-decoration:none;}
 <!-- SETUP SCREEN -->
 <div id="screen-setup" class="screen" style="overflow-y:auto;">
   <div class="setup-screen">
+    <div id="setup-back-row" style="margin-bottom:14px;display:none;">
+      <button class="back-btn" onclick="showScreen('list')" style="font-size:14px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Today
+      </button>
+    </div>
     <div class="setup-logo">Telluno <span>BD</span></div>
     <div class="setup-tagline">One-time setup · Takes about 10 minutes</div>
 
@@ -301,7 +307,7 @@ a{color:inherit;text-decoration:none;}
         <span id="redirect-hint" style="display:block;margin-top:8px;padding:8px;background:rgba(58,143,232,.1);border-radius:8px;color:var(--blue);font-size:12px;"></span>
       </div>
       <label class="setup-label">Paste your Application (Client) ID here:</label>
-      <input class="setup-input" id="setup-clientid" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      <input class="setup-input" id="setup-clientid" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="c8d9a976-6c09-4cc3-a173-791443b815db">
     </div>
 
     <div class="setup-step">
@@ -313,9 +319,9 @@ a{color:inherit;text-decoration:none;}
         <br><br>After logging an outcome, the tool automatically changes that cell to <code>Done</code> so your list self-manages.
       </div>
       <label class="setup-label">VES/Gyre pipeline sheet name:</label>
-      <input class="setup-input" id="setup-pipe-sheet" placeholder="Pipeline" value="Pipeline">
+      <input class="setup-input" id="setup-pipe-sheet" placeholder="PIPELINE" value="PIPELINE">
       <label class="setup-label">Telluno pipeline sheet name:</label>
-      <input class="setup-input" id="setup-telluno-sheet" placeholder="Telluno Outreach" value="Telluno Outreach">
+      <input class="setup-input" id="setup-telluno-sheet" placeholder="Pipeline" value="Pipeline">
     </div>
 
     <div class="setup-step">
@@ -325,13 +331,13 @@ a{color:inherit;text-decoration:none;}
         Enter the paths to your files relative to your OneDrive root folder. Use forward slashes.
       </div>
       <label class="setup-label">VES Pipeline path:</label>
-      <input class="setup-input" id="setup-ves" placeholder="Telluno/VES_Pipeline.xlsx" value="Telluno/VES_Pipeline.xlsx">
+      <input class="setup-input" id="setup-ves" placeholder="VES/VES AirDoor PIPELINE version_20APR2026.xlsx" value="VES/VES AirDoor PIPELINE version_20APR2026.xlsx">
       <label class="setup-label">Gyre Pipeline path:</label>
-      <input class="setup-input" id="setup-gyre" placeholder="Telluno/Gyre_Pipeline.xlsx" value="Telluno/Gyre_Pipeline.xlsx">
+      <input class="setup-input" id="setup-gyre" placeholder="Gyre Energy/GYRE PIPELINE version_20APR2026.xlsx" value="Gyre Energy/GYRE PIPELINE version_20APR2026.xlsx">
       <label class="setup-label">Telluno Pipeline (CRM) path:</label>
       <input class="setup-input" id="setup-telluno" placeholder="Telluno BD/TELLUNO_PIPELINE_Outreach_19MAY2026_v14.xlsx" value="Telluno BD/TELLUNO_PIPELINE_Outreach_19MAY2026_v14.xlsx">
       <label class="setup-label">Master Contacts path (for VES/Gyre only):</label>
-      <input class="setup-input" id="setup-contacts" placeholder="Telluno/Telluno_Contacts.xlsx" value="Telluno/Telluno_Contacts.xlsx">
+      <input class="setup-input" id="setup-contacts" placeholder="Telluno BD/Master Contacts List/MasterContactsList.xlsx" value="Telluno BD/Master Contacts List/MasterContactsList.xlsx">
       <label class="setup-label">Contacts sheet name:</label>
       <input class="setup-input" id="setup-cont-sheet" placeholder="Contacts" value="Contacts">
     </div>
@@ -383,6 +389,9 @@ a{color:inherit;text-decoration:none;}
         <div class="topbar-sub" id="list-date-sub">Loading…</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="openSettings()" aria-label="Settings" style="background:transparent;border:none;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         <div class="avatar" id="user-avatar">JO</div>
       </div>
     </div>
@@ -604,13 +613,13 @@ a{color:inherit;text-decoration:none;}
    CONFIG — persisted to localStorage after setup
 ══════════════════════════════════════════════════ */
 const CFG = {
-  get clientId()      { return localStorage.getItem('tc_cid')      || ''; },
-  get vesPipeline()   { return localStorage.getItem('tc_ves')      || 'Telluno/VES_Pipeline.xlsx'; },
-  get gyrePipeline()  { return localStorage.getItem('tc_gyre')     || 'Telluno/Gyre_Pipeline.xlsx'; },
+  get clientId()      { return localStorage.getItem('tc_cid')      || 'c8d9a976-6c09-4cc3-a173-791443b815db'; },
+  get vesPipeline()   { return localStorage.getItem('tc_ves')      || 'VES/VES AirDoor PIPELINE version_20APR2026.xlsx'; },
+  get gyrePipeline()  { return localStorage.getItem('tc_gyre')     || 'Gyre Energy/GYRE PIPELINE version_20APR2026.xlsx'; },
   get tellunoPipeline(){ return localStorage.getItem('tc_telluno') || 'Telluno BD/TELLUNO_PIPELINE_Outreach_19MAY2026_v14.xlsx'; },
-  get contacts()      { return localStorage.getItem('tc_cont')     || 'Telluno/Telluno_Contacts.xlsx'; },
-  get pipeSheet()     { return localStorage.getItem('tc_ps')       || 'Pipeline'; },
-  get tellunoSheet()  { return localStorage.getItem('tc_ts')       || 'Telluno Outreach'; },
+  get contacts()      { return localStorage.getItem('tc_cont')     || 'Telluno BD/Master Contacts List/MasterContactsList.xlsx'; },
+  get pipeSheet()     { return localStorage.getItem('tc_ps')       || 'PIPELINE'; },
+  get tellunoSheet()  { return localStorage.getItem('tc_ts')       || 'Pipeline'; },
   get contSheet()     { return localStorage.getItem('tc_cs')       || 'Contacts'; },
 };
 
@@ -671,10 +680,38 @@ function saveSetup() {
   localStorage.setItem('tc_gyre',    document.getElementById('setup-gyre').value.trim());
   localStorage.setItem('tc_telluno', document.getElementById('setup-telluno').value.trim());
   localStorage.setItem('tc_cont',    document.getElementById('setup-contacts').value.trim());
-  localStorage.setItem('tc_ps',      document.getElementById('setup-pipe-sheet').value.trim() || 'Pipeline');
-  localStorage.setItem('tc_ts',      document.getElementById('setup-telluno-sheet').value.trim() || 'Telluno Outreach');
+  localStorage.setItem('tc_ps',      document.getElementById('setup-pipe-sheet').value.trim() || 'PIPELINE');
+  localStorage.setItem('tc_ts',      document.getElementById('setup-telluno-sheet').value.trim() || 'Pipeline');
   localStorage.setItem('tc_cs',      document.getElementById('setup-cont-sheet').value.trim() || 'Contacts');
-  initMsal();
+
+  // If already signed in, just reload data instead of re-auth
+  if (currentAccount && msalInstance) {
+    showToast('✓ Settings saved');
+    showScreen('list');
+    setTimeout(() => loadData(), 200);
+  } else {
+    initMsal();
+  }
+}
+
+// Settings button on Today screen
+function openSettings() {
+  // Pre-fill all fields with current values
+  document.getElementById('setup-clientid').value     = CFG.clientId;
+  document.getElementById('setup-ves').value          = CFG.vesPipeline;
+  document.getElementById('setup-gyre').value         = CFG.gyrePipeline;
+  document.getElementById('setup-telluno').value      = CFG.tellunoPipeline;
+  document.getElementById('setup-contacts').value     = CFG.contacts;
+  document.getElementById('setup-pipe-sheet').value   = CFG.pipeSheet;
+  document.getElementById('setup-telluno-sheet').value= CFG.tellunoSheet;
+  document.getElementById('setup-cont-sheet').value   = CFG.contSheet;
+  // Show back-to-today affordance and adjust button label since we're in edit mode
+  if (currentAccount) {
+    document.getElementById('setup-back-row').style.display = 'block';
+    const btn = document.querySelector('.setup-save-btn');
+    if (btn) btn.textContent = 'Save Changes →';
+  }
+  showScreen('setup');
 }
 
 /* ══════════════════════════════════════════════════
